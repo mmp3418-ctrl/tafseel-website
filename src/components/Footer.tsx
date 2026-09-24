@@ -30,11 +30,8 @@ export default function Footer() {
 
   const quickLinks = useMemo(
     () => [
-      { href: "#applications", label: t.nav.projects },
       { href: "#products", label: t.nav.products },
-      { href: "#features", label: t.nav.features },
-      { href: "#configurator", label: t.nav.custom },
-      { href: "#process", label: t.process.badge },
+      { href: "#applications", label: t.nav.projects },
       { href: "#contact", label: t.nav.contact },
     ],
     [t]
