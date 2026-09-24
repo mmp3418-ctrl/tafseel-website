@@ -16,7 +16,7 @@ export default function HomePage() {
   const [contactOpen, setContactOpen] = useState(false);
 
   return (
-    <div id="top" className="bg-brand-bg transition-colors duration-300">
+    <div id="top" className="w-full min-h-screen overflow-x-hidden bg-brand-bg transition-colors duration-300">
       <Header onOpenContact={() => setContactOpen(true)} />
       <main>
         <Hero onOpenContact={() => setContactOpen(true)} />

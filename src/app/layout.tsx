@@ -26,7 +26,7 @@ export default function RootLayout({
     <html
       lang="ar"
       dir="rtl"
-      className={`${cairo.variable} dark h-full`}
+      className={`${cairo.variable} dark h-full w-full overflow-x-hidden`}
       suppressHydrationWarning
     >
       <head>
@@ -36,7 +36,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-full bg-brand-bg font-sans text-brand-text antialiased transition-colors duration-300">
+      <body className="min-h-screen w-full overflow-x-hidden bg-neutral-950 font-sans text-white antialiased transition-colors duration-300">
         <AppProviders>{children}</AppProviders>
       </body>
     </html>
