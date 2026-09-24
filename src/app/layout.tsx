@@ -10,6 +10,9 @@ const cairo = Cairo({
   display: "swap",
 });
 
+/** Production GitHub Pages base — inlined at build time via next.config env */
+const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 export const metadata: Metadata = {
   title: "شركة تفاصيل للمظلات الحديثة | Tafasil Modern Canopies",
   description:
@@ -26,17 +29,19 @@ export default function RootLayout({
     <html
       lang="ar"
       dir="rtl"
-      className={`${cairo.variable} dark h-full w-full overflow-x-hidden`}
+      className={`${cairo.variable} dark w-full min-h-screen bg-neutral-950 text-white overflow-x-hidden`}
       suppressHydrationWarning
     >
       <head>
+        {/* Stable CSS URL outside `_next` — survives GitHub Pages/Jekyll */}
+        <link rel="stylesheet" href={`${BASE}/assets/site.css`} />
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var t=localStorage.getItem("tafasil-theme");if(t!=="light")document.documentElement.classList.add("dark");else document.documentElement.classList.remove("dark");}catch(e){document.documentElement.classList.add("dark");}})();`,
           }}
         />
       </head>
-      <body className="min-h-screen w-full overflow-x-hidden bg-neutral-950 font-sans text-white antialiased transition-colors duration-300">
+      <body className="w-full min-h-screen bg-neutral-950 text-white overflow-x-hidden font-sans antialiased transition-colors duration-300">
         <AppProviders>{children}</AppProviders>
       </body>
     </html>
