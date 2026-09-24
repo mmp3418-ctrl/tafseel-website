@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, type SVGProps } from "react";
+import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowUp } from "lucide-react";
 import { COMPANY } from "@/lib/products";
@@ -30,9 +31,10 @@ export default function Footer() {
 
   const quickLinks = useMemo(
     () => [
-      { href: "#products", label: t.nav.products },
-      { href: "#applications", label: t.nav.projects },
-      { href: "#contact", label: t.nav.contact },
+      { href: "/#products", label: t.nav.products },
+      { href: "/#applications", label: t.nav.projects },
+      { href: "/customize/", label: t.nav.custom },
+      { href: "/#contact", label: t.nav.contact },
     ],
     [t]
   );
@@ -61,15 +63,15 @@ export default function Footer() {
             dir={dir}
           >
             <div className="lg:col-span-5">
-              <a
-                href="#top"
+              <Link
+                href="/"
                 className="group inline-flex items-center rounded-xl bg-transparent p-1 transition hover:scale-[1.02]"
               >
                 <BrandLogo
                   alt={locale === "ar" ? COMPANY.nameAr : COMPANY.shortName}
                   className="relative h-14 w-auto max-h-20 object-contain drop-shadow-[0_2px_8px_rgba(209,172,129,0.35)] transition-all duration-300 sm:h-16 lg:h-20"
                 />
-              </a>
+              </Link>
               <p className="mt-5 max-w-md text-sm leading-relaxed text-[#E2E8F0] drop-shadow-sm">
                 {locale === "ar" ? COMPANY.nameAr : COMPANY.shortName} —{" "}
                 {t.footer.blurb}
@@ -104,12 +106,12 @@ export default function Footer() {
               <ul className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm">
                 {quickLinks.map((link) => (
                   <li key={link.href}>
-                    <a
+                    <Link
                       href={link.href}
                       className="text-[#E2E8F0] transition hover:text-[#D1AC81]"
                     >
                       {link.label}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>

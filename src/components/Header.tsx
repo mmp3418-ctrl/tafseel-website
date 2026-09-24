@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, MessageCircle, Moon, Sun, X } from "lucide-react";
 import { COMPANY } from "@/lib/products";
@@ -12,18 +14,37 @@ interface HeaderProps {
   onOpenContact: () => void;
 }
 
+type NavItem = {
+  href: string;
+  label: string;
+  /** Section id on the home page for scroll-spy (omit for route links) */
+  sectionId?: string;
+};
+
 export default function Header({ onOpenContact }: HeaderProps) {
   const { t, locale, theme, toggleLocale, toggleTheme, dir } = useApp();
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [activeHref, setActiveHref] = useState("#hero");
+  const [activeHref, setActiveHref] = useState("/");
 
-  const navLinks = useMemo(
+  const isCustomize =
+    pathname === "/customize" ||
+    pathname === "/customize/" ||
+    pathname === "/configurator" ||
+    pathname === "/configurator/";
+
+  const navLinks = useMemo<NavItem[]>(
     () => [
-      { href: "#hero", label: t.nav.home },
-      { href: "#products", label: t.nav.products },
-      { href: "#applications", label: t.nav.projects },
-      { href: "#contact", label: t.nav.contact },
+      { href: "/", label: t.nav.home, sectionId: "hero" },
+      { href: "/#products", label: t.nav.products, sectionId: "products" },
+      {
+        href: "/#applications",
+        label: t.nav.projects,
+        sectionId: "applications",
+      },
+      { href: "/customize/", label: t.nav.custom },
+      { href: "/#contact", label: t.nav.contact, sectionId: "contact" },
     ],
     [t]
   );
@@ -36,14 +57,19 @@ export default function Header({ onOpenContact }: HeaderProps) {
   }, []);
 
   useEffect(() => {
-    const ids = navLinks.map((l) => l.href.slice(1));
+    if (isCustomize) {
+      setActiveHref("/customize/");
+      return;
+    }
+
+    const sectionLinks = navLinks.filter((l) => l.sectionId);
     const observers: IntersectionObserver[] = [];
-    ids.forEach((id) => {
-      const el = document.getElementById(id);
+    sectionLinks.forEach((link) => {
+      const el = document.getElementById(link.sectionId!);
       if (!el) return;
       const obs = new IntersectionObserver(
         ([entry]) => {
-          if (entry.isIntersecting) setActiveHref(`#${id}`);
+          if (entry.isIntersecting) setActiveHref(link.href);
         },
         { rootMargin: "-40% 0px -50% 0px", threshold: 0 }
       );
@@ -51,7 +77,7 @@ export default function Header({ onOpenContact }: HeaderProps) {
       observers.push(obs);
     });
     return () => observers.forEach((o) => o.disconnect());
-  }, [navLinks]);
+  }, [navLinks, isCustomize]);
 
   return (
     <div className="pointer-events-none fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-4 sm:pt-4">
@@ -60,14 +86,14 @@ export default function Header({ onOpenContact }: HeaderProps) {
           scrolled ? "shadow-[0_20px_50px_rgba(0,0,0,0.45)]" : ""
         }`}
       >
-        <a
-          href="#hero"
+        <Link
+          href="/"
           className="group relative z-10 flex min-w-0 shrink-0 items-center"
         >
           <BrandLogo
             alt={locale === "ar" ? COMPANY.nameAr : COMPANY.shortName}
           />
-        </a>
+        </Link>
 
         <nav
           className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-0.5 lg:flex"
@@ -76,7 +102,7 @@ export default function Header({ onOpenContact }: HeaderProps) {
           {navLinks.map((link) => {
             const active = activeHref === link.href;
             return (
-              <a
+              <Link
                 key={link.href}
                 href={link.href}
                 className="group relative px-3 py-2 text-[13px] font-medium transition-colors"
@@ -97,7 +123,7 @@ export default function Header({ onOpenContact }: HeaderProps) {
                       : "scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-70"
                   }`}
                 />
-              </a>
+              </Link>
             );
           })}
         </nav>
@@ -194,7 +220,7 @@ export default function Header({ onOpenContact }: HeaderProps) {
           >
             <nav className="flex flex-col px-4 py-3" dir={dir}>
               {navLinks.map((link) => (
-                <a
+                <Link
                   key={link.href}
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
@@ -205,7 +231,7 @@ export default function Header({ onOpenContact }: HeaderProps) {
                   }`}
                 >
                   {link.label}
-                </a>
+                </Link>
               ))}
               <CatalogDownloadLink
                 className="mt-3 mb-1 inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#C3986E] to-[#D1AC81] px-6 py-3 font-bold text-[#12100E] shadow-lg transition-all duration-300 hover:scale-105"
