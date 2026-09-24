@@ -54,13 +54,16 @@ export default function Header({ onOpenContact }: HeaderProps) {
   }, [navLinks]);
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 top-0 z-50 px-4 pt-4">
+    <div className="pointer-events-none fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-4 sm:pt-4">
       <header
-        className={`pointer-events-auto mx-auto flex max-w-7xl items-center justify-between gap-3 rounded-full border border-[#D1AC81]/20 bg-[#1A1612]/80 px-6 py-2.5 shadow-2xl backdrop-blur-xl transition-all duration-300 sm:py-3 ${
+        className={`pointer-events-auto mx-auto flex max-w-7xl items-center justify-between gap-2 rounded-full border border-[#D1AC81]/20 bg-[#1A1612]/80 px-3 py-2 shadow-2xl backdrop-blur-xl transition-all duration-300 sm:gap-3 sm:px-6 sm:py-2.5 ${
           scrolled ? "shadow-[0_20px_50px_rgba(0,0,0,0.45)]" : ""
         }`}
       >
-        <a href="#hero" className="group relative z-10 flex shrink-0 items-center">
+        <a
+          href="#hero"
+          className="group relative z-10 flex min-w-0 shrink-0 items-center"
+        >
           <BrandLogo
             alt={locale === "ar" ? COMPANY.nameAr : COMPANY.shortName}
           />
@@ -76,7 +79,7 @@ export default function Header({ onOpenContact }: HeaderProps) {
               <a
                 key={link.href}
                 href={link.href}
-                className="group relative px-3.5 py-2 text-[13px] font-medium transition-colors"
+                className="group relative px-3 py-2 text-[13px] font-medium transition-colors"
               >
                 <span
                   className={
@@ -99,16 +102,16 @@ export default function Header({ onOpenContact }: HeaderProps) {
           })}
         </nav>
 
-        <div className="flex items-center gap-1.5 sm:gap-2">
+        <div className="flex shrink-0 items-center gap-1 sm:gap-2">
           <div
-            className="flex items-center rounded-full border border-[#D1AC81]/25 bg-[#12100E]/60 p-0.5 text-[11px] font-semibold"
+            className="flex items-center rounded-full border border-[#D1AC81]/25 bg-[#12100E]/60 p-0.5 text-[10px] font-semibold sm:text-[11px]"
             role="group"
             aria-label={t.a11y.lang}
           >
             <button
               type="button"
               onClick={() => locale !== "ar" && toggleLocale()}
-              className={`rounded-full px-2.5 py-1.5 transition ${
+              className={`rounded-full px-2 py-1 transition sm:px-2.5 sm:py-1.5 ${
                 locale === "ar"
                   ? "bg-[#C3986E] text-[#12100E] shadow-sm"
                   : "text-[#E2E8F0]/70 hover:text-[#D1AC81]"
@@ -119,7 +122,7 @@ export default function Header({ onOpenContact }: HeaderProps) {
             <button
               type="button"
               onClick={() => locale !== "en" && toggleLocale()}
-              className={`rounded-full px-2.5 py-1.5 transition ${
+              className={`rounded-full px-2 py-1 transition sm:px-2.5 sm:py-1.5 ${
                 locale === "en"
                   ? "bg-[#C3986E] text-[#12100E] shadow-sm"
                   : "text-[#E2E8F0]/70 hover:text-[#D1AC81]"
@@ -133,7 +136,7 @@ export default function Header({ onOpenContact }: HeaderProps) {
             type="button"
             onClick={toggleTheme}
             aria-label={t.a11y.theme}
-            className="rounded-full border border-[#D1AC81]/25 p-2 text-[#D1AC81] transition hover:scale-105 hover:border-[#C3986E] hover:bg-[#C3986E]/10"
+            className="rounded-full border border-[#D1AC81]/25 p-1.5 text-[#D1AC81] transition hover:scale-105 hover:border-[#C3986E] hover:bg-[#C3986E]/10 sm:p-2"
           >
             {theme === "dark" ? (
               <Sun className="h-4 w-4" strokeWidth={1.75} />
@@ -146,14 +149,14 @@ export default function Header({ onOpenContact }: HeaderProps) {
             href={COMPANY.whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden items-center gap-2 rounded-full bg-gradient-to-r from-[#C3986E] to-[#D1AC81] px-5 py-2 text-[13px] font-bold text-[#12100E] shadow-lg transition-all hover:scale-105 sm:inline-flex"
+            className="hidden items-center gap-2 rounded-full bg-gradient-to-r from-[#C3986E] to-[#D1AC81] px-4 py-2 text-[13px] font-bold text-[#12100E] shadow-lg transition-all hover:scale-105 md:inline-flex"
           >
             <MessageCircle className="h-4 w-4" />
             {t.nav.whatsapp}
           </a>
 
           <CatalogDownloadLink
-            className="hidden items-center gap-2 rounded-full border border-[#D1AC81]/30 bg-[#C3986E]/10 px-4 py-2 text-[12px] font-bold text-[#D1AC81] transition hover:scale-105 hover:border-[#C3986E] hover:bg-[#C3986E]/20 md:inline-flex"
+            className="hidden items-center gap-2 rounded-full border border-[#D1AC81]/30 bg-[#C3986E]/10 px-3 py-2 text-[12px] font-bold text-[#D1AC81] transition hover:scale-105 hover:border-[#C3986E] hover:bg-[#C3986E]/20 lg:inline-flex"
           />
 
           <button
@@ -166,7 +169,7 @@ export default function Header({ onOpenContact }: HeaderProps) {
 
           <button
             type="button"
-            className="rounded-full p-2 text-[#FAFBF9] transition hover:bg-[#C3986E]/10 lg:hidden"
+            className="rounded-full p-1.5 text-[#FAFBF9] transition hover:bg-[#C3986E]/10 sm:p-2 lg:hidden"
             onClick={() => setMobileOpen((v) => !v)}
             aria-label={t.a11y.menu}
             aria-expanded={mobileOpen}

@@ -1,27 +1,27 @@
 "use client";
 
+import { asset } from "@/lib/assets";
+
 type BrandLogoProps = {
   alt?: string;
   className?: string;
   glow?: boolean;
 };
 
-/** Compact header-friendly logo sizing (h-11 / ~h-13 / ~h-15) */
 const HEADER_IMG_CLASS =
-  "relative h-11 w-auto max-h-16 object-contain drop-shadow-[0_2px_8px_rgba(209,172,129,0.35)] transition-all duration-300 sm:h-[3.25rem] lg:h-[3.75rem]";
+  "relative h-9 w-auto max-h-12 object-contain drop-shadow-[0_2px_8px_rgba(209,172,129,0.35)] transition-all duration-300 sm:h-11 lg:h-12";
 
-/**
- * Logo with subtle gold backlight — sized for a compact navbar by default.
- */
 export default function BrandLogo({
   alt = "شركة تفاصيل للمظلات الحديثة",
   className = HEADER_IMG_CLASS,
   glow = true,
 }: BrandLogoProps) {
+  const src = asset("/lo.png");
+
   if (!glow) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
-      <img src="/lo.png" alt={alt} className={className} />
+      <img src={src} alt={alt} className={className} />
     );
   }
 
@@ -32,7 +32,7 @@ export default function BrandLogo({
         aria-hidden
       />
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/lo.png" alt={alt} className={className} />
+      <img src={src} alt={alt} className={className} />
     </div>
   );
 }

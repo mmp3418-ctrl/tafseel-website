@@ -1,6 +1,7 @@
 "use client";
 
 import { useApp } from "@/components/providers/AppProviders";
+import { asset } from "@/lib/assets";
 
 type CatalogDownloadLinkProps = {
   className?: string;
@@ -18,7 +19,7 @@ export default function CatalogDownloadLink({
 
   return (
     <a
-      href="/catalog.pdf"
+      href={asset("/catalog.pdf")}
       download="Tafseel-Shades-Catalog.pdf"
       target="_blank"
       rel="noopener noreferrer"
