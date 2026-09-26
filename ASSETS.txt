@@ -1,0 +1,7 @@
+# Flat public assets (root of /public — no subfolders required)
+#
+#   lo.png          → company logo
+#   vo.mp4          → hero background video
+#   vo.webm         → optional webm fallback
+#   j1.jpeg … j6.jpeg → applications gallery
+#   catalog.pdf     → product catalog download
