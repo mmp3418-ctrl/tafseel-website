@@ -19,7 +19,7 @@ export type ProductCategory = {
 function imageRange(prefix: string, count: number): string[] {
   return Array.from(
     { length: count },
-    (_, i) => `/images/${prefix}${i + 1}.jpg`
+    (_, i) => `/images/${prefix}${i + 1}.jpeg`
   );
 }
 
@@ -73,12 +73,12 @@ export const PRODUCT_CATEGORIES: ProductCategory[] = [
 ];
 
 export const PROJECT_GALLERY_IMAGES = [
-  "/images/t1.jpg",
-  "/images/t2.jpg",
-  "/images/q4.jpg",
-  "/images/q3.jpg",
-  "/images/n3.jpg",
-  "/images/n5.jpg",
-  "/images/y3.jpg",
-  "/images/y2.jpg",
+  "/images/t1.jpeg",
+  "/images/t2.jpeg",
+  "/images/q4.jpeg",
+  "/images/q3.jpeg",
+  "/images/n3.jpeg",
+  "/images/n5.jpeg",
+  "/images/y3.jpeg",
+  "/images/y2.jpeg",
 ] as const;
