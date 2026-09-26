@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, ImageOff } from "lucide-react";
-import { asset } from "@/lib/assets";
+import PublicMediaImg from "@/components/PublicMediaImg";
 
 type ImageCarouselProps = {
   images: string[];
@@ -11,17 +11,18 @@ type ImageCarouselProps = {
 
 export default function ImageCarousel({ images, alt }: ImageCarouselProps) {
   const [index, setIndex] = useState(0);
-  const [broken, setBroken] = useState<Record<number, boolean>>({});
+  const [failed, setFailed] = useState(false);
   const total = images.length;
 
   useEffect(() => {
     setIndex(0);
-    setBroken({});
+    setFailed(false);
   }, [images]);
 
   const go = useCallback(
     (dir: -1 | 1) => {
       if (total <= 0) return;
+      setFailed(false);
       setIndex((prev) => (prev + dir + total) % total);
     },
     [total]
@@ -36,6 +37,8 @@ export default function ImageCarousel({ images, alt }: ImageCarouselProps) {
     return () => window.removeEventListener("keydown", onKey);
   }, [go]);
 
+  const current = useMemo(() => images[index] ?? "", [images, index]);
+
   if (!total) {
     return (
       <div className="flex h-64 items-center justify-center rounded-2xl border border-neutral-800 bg-neutral-900/60 text-sm text-neutral-400">
@@ -44,25 +47,22 @@ export default function ImageCarousel({ images, alt }: ImageCarouselProps) {
     );
   }
 
-  const src = asset(images[index]);
-  const isBroken = broken[index];
-
   return (
     <div className="relative overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900/60 p-2">
       <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-neutral-950">
-        {isBroken ? (
+        {failed ? (
           <div className="flex h-full flex-col items-center justify-center gap-2 text-neutral-500">
             <ImageOff className="h-8 w-8" />
-            <span className="text-xs">{images[index]}</span>
+            <span className="text-xs">{current}</span>
           </div>
         ) : (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            key={src}
-            src={src}
+          <PublicMediaImg
+            key={current}
+            src={current}
             alt={`${alt} — ${index + 1}`}
             className="h-full w-full object-cover transition-opacity duration-300"
-            onError={() => setBroken((b) => ({ ...b, [index]: true }))}
+            loading="eager"
+            onAllFailed={() => setFailed(true)}
           />
         )}
       </div>

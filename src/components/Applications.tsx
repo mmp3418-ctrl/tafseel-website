@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useApp } from "@/components/providers/AppProviders";
-import { asset } from "@/lib/assets";
+import PublicMediaImg from "@/components/PublicMediaImg";
 
 export const galleryImages = [
   { id: 1, file: "/j1.jpeg", alt: "مشروع مظلات 1" },
@@ -37,7 +37,7 @@ export default function Applications() {
           {galleryImages.map((item, i) => (
             <ImageCard
               key={item.id}
-              image={asset(item.file)}
+              image={item.file}
               alt={item.alt}
               index={i}
             />
@@ -67,8 +67,7 @@ function ImageCard({
       className="overflow-hidden rounded-2xl border border-[rgba(209,172,129,0.2)] bg-[#241E18] p-2 transition-all duration-300 hover:border-[#C3986E] hover:shadow-xl sm:rounded-3xl"
     >
       <div className="overflow-hidden rounded-xl bg-[#1A1612]">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <PublicMediaImg
           src={image}
           alt={alt}
           className="h-48 w-full object-cover transition-transform duration-500 hover:scale-105 sm:h-64"

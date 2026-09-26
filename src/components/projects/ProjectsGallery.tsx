@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { PROJECT_GALLERY_IMAGES } from "@/lib/product-catalog";
-import { asset } from "@/lib/assets";
+import PublicMediaImg from "@/components/PublicMediaImg";
 
 export default function ProjectsGallery() {
   return (
@@ -29,9 +29,8 @@ export default function ProjectsGallery() {
               className="group overflow-hidden rounded-2xl border border-[rgba(209,172,129,0.2)] bg-[#241E18] p-2"
             >
               <div className="aspect-square overflow-hidden rounded-xl bg-[#1A1612]">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={asset(src)}
+                <PublicMediaImg
+                  src={src}
                   alt={`مشروع ${i + 1}`}
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                   loading="lazy"

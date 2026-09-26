@@ -73,12 +73,12 @@ export const PRODUCT_CATEGORIES: ProductCategory[] = [
 ];
 
 export const PROJECT_GALLERY_IMAGES = [
-  "/images/t1.jpeg",
-  "/images/t2.jpeg",
-  "/images/q4.jpeg",
-  "/images/q3.jpeg",
-  "/images/n3.jpeg",
-  "/images/n5.jpeg",
-  "/images/y3.jpeg",
-  "/images/y2.jpeg",
+  "t1.jpeg",
+  "t2.jpeg",
+  "q4.jpeg",
+  "q3.jpeg",
+  "n3.jpeg",
+  "n5.jpeg",
+  "y3.jpeg",
+  "y2.jpeg",
 ] as const;

@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { COMPANY } from "@/lib/products";
 import { useApp } from "@/components/providers/AppProviders";
-import { asset } from "@/lib/assets";
+import PublicMediaImg from "@/components/PublicMediaImg";
 
 export default function ProductSeries() {
   const { t, dir } = useApp();
@@ -13,13 +13,13 @@ export default function ProductSeries() {
     () => [
       {
         id: 1,
-        image: asset("/j7.jpeg"),
+        image: "/j7.jpeg",
         title: t.products.card1Title,
         description: t.products.card1Desc,
       },
       {
         id: 2,
-        image: asset("/j8.jpeg"),
+        image: "/j8.jpeg",
         title: t.products.card2Title,
         description: t.products.card2Desc,
       },
@@ -82,11 +82,11 @@ function SeriesCard({
       className="overflow-hidden rounded-2xl border border-[rgba(209,172,129,0.2)] bg-[#241E18] p-3 transition-all duration-300 hover:border-[#C3986E] hover:shadow-xl sm:rounded-3xl sm:p-6"
     >
       <div className="mb-4 overflow-hidden rounded-xl bg-[#1A1612] sm:mb-6">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <PublicMediaImg
           src={item.image}
           alt={item.title}
           className="h-48 w-full object-cover transition-transform duration-500 hover:scale-105 sm:h-64"
+          loading="lazy"
         />
       </div>
 
