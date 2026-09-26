@@ -1,0 +1,11 @@
+# Product & project media
+#
+# Place files here as referenced by the Products / Projects pages:
+#
+# Electric:     t1.jpg … t10.jpg
+# Manual:       y1.jpg … y10.jpg
+# Braccio:      k1.jpg … k15.jpg
+# Pyramid:      n1.jpg … n15.jpg
+# Sail:         i1.jpg … i20.jpg
+# Arched:       q1.jpg … q5.jpg
+# Projects mix: t1, t2, q4, q3, n3, n5, y3, y2
