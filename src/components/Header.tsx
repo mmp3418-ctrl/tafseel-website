@@ -23,33 +23,39 @@ type NavItem = {
 
 export default function Header({ onOpenContact }: HeaderProps) {
   const { t, locale, theme, toggleLocale, toggleTheme, dir } = useApp();
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "/";
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeHref, setActiveHref] = useState("/");
 
+  const path = pathname.replace(/\/$/, "") || "/";
   const isCustomize =
-    pathname === "/customize" ||
-    pathname === "/customize/" ||
-    pathname === "/configurator" ||
-    pathname === "/configurator/";
+    path === "/customize" ||
+    path === "/configurator" ||
+    path.endsWith("/customize") ||
+    path.endsWith("/configurator");
+  const isProducts = path === "/products" || path.endsWith("/products");
+  const isProjects = path === "/projects" || path.endsWith("/projects");
 
   const navLinks = useMemo<NavItem[]>(
     () => [
-      { href: "/", label: t.nav.home, sectionId: "hero" },
-      { href: "/#products", label: t.nav.products, sectionId: "products" },
+      { href: "/", label: t?.nav?.home ?? "الرئيسية", sectionId: "hero" },
       {
-        href: "/#applications",
-        label: t.nav.projects,
-        sectionId: "applications",
+        href: "/products/",
+        label: t?.nav?.products ?? "المنتجات",
       },
-      { href: "/customize/", label: t.nav.custom },
-      { href: "/#contact", label: t.nav.contact, sectionId: "contact" },
+      {
+        href: "/projects/",
+        label: t?.nav?.projects ?? "المشاريع",
+      },
+      { href: "/customize/", label: t?.nav?.custom ?? "التخصيص" },
+      { href: "/#contact", label: t?.nav?.contact ?? "تواصل", sectionId: "contact" },
     ],
     [t]
   );
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
     const onScroll = () => setScrolled(window.scrollY > 20);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -59,6 +65,14 @@ export default function Header({ onOpenContact }: HeaderProps) {
   useEffect(() => {
     if (isCustomize) {
       setActiveHref("/customize/");
+      return;
+    }
+    if (isProducts) {
+      setActiveHref("/products/");
+      return;
+    }
+    if (isProjects) {
+      setActiveHref("/projects/");
       return;
     }
 
@@ -77,7 +91,7 @@ export default function Header({ onOpenContact }: HeaderProps) {
       observers.push(obs);
     });
     return () => observers.forEach((o) => o.disconnect());
-  }, [navLinks, isCustomize]);
+  }, [navLinks, isCustomize, isProducts, isProjects]);
 
   return (
     <div className="pointer-events-none fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-4 sm:pt-4">

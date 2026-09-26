@@ -10,8 +10,9 @@ const cairo = Cairo({
   display: "swap",
 });
 
-/** Production GitHub Pages base — inlined at build time via next.config env */
-const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+const BASE =
+  process.env.NEXT_PUBLIC_BASE_PATH ||
+  (process.env.NODE_ENV === "production" ? "/tafseel-website" : "");
 
 export const metadata: Metadata = {
   title: "شركة تفاصيل للمظلات الحديثة | Tafasil Modern Canopies",
@@ -33,7 +34,6 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        {/* Stable CSS URL outside `_next` — survives GitHub Pages/Jekyll */}
         <link rel="stylesheet" href={`${BASE}/assets/site.css`} />
         <script
           dangerouslySetInnerHTML={{
@@ -41,7 +41,10 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="w-full min-h-screen bg-neutral-950 text-white overflow-x-hidden font-sans antialiased transition-colors duration-300">
+      <body
+        className="w-full min-h-screen bg-neutral-950 text-white overflow-x-hidden font-sans antialiased transition-colors duration-300"
+        suppressHydrationWarning
+      >
         <AppProviders>{children}</AppProviders>
       </body>
     </html>

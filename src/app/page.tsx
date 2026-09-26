@@ -8,15 +8,21 @@ import Applications from "@/components/Applications";
 import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
 import ContactModal from "@/components/ContactModal";
+import { useIsMounted } from "@/hooks/useIsMounted";
 
 /**
  * شركة تفاصيل للمظلات الحديثة — static landing page (GitHub Pages export)
  */
 export default function HomePage() {
   const [contactOpen, setContactOpen] = useState(false);
+  const mounted = useIsMounted();
 
   return (
-    <div id="top" className="w-full min-h-screen overflow-x-hidden bg-brand-bg transition-colors duration-300">
+    <div
+      id="top"
+      className="w-full min-h-screen overflow-x-hidden bg-brand-bg transition-colors duration-300"
+      data-mounted={mounted ? "true" : "false"}
+    >
       <Header onOpenContact={() => setContactOpen(true)} />
       <main>
         <Hero onOpenContact={() => setContactOpen(true)} />

@@ -64,7 +64,7 @@ export default function ProductsCatalog() {
           <motion.div
             key={active.id}
             role="tabpanel"
-            initial={{ opacity: 0, y: 16 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -12 }}
             transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}

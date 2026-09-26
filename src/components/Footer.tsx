@@ -31,15 +31,16 @@ export default function Footer() {
 
   const quickLinks = useMemo(
     () => [
-      { href: "/#products", label: t.nav.products },
-      { href: "/#applications", label: t.nav.projects },
-      { href: "/customize/", label: t.nav.custom },
-      { href: "/#contact", label: t.nav.contact },
+      { href: "/products/", label: t?.nav?.products ?? "المنتجات" },
+      { href: "/projects/", label: t?.nav?.projects ?? "المشاريع" },
+      { href: "/customize/", label: t?.nav?.custom ?? "التخصيص" },
+      { href: "/#contact", label: t?.nav?.contact ?? "تواصل" },
     ],
     [t]
   );
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
     const onScroll = () => setShowTop(window.scrollY > 480);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });

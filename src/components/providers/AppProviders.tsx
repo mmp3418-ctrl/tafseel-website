@@ -22,6 +22,7 @@ type AppContextValue = {
   theme: Theme;
   t: TranslationDict;
   dir: "rtl" | "ltr";
+  mounted: boolean;
   setLocale: (locale: Locale) => void;
   toggleLocale: () => void;
   setTheme: (theme: Theme) => void;
@@ -33,35 +34,53 @@ const AppContext = createContext<AppContextValue | null>(null);
 const LOCALE_KEY = "tafasil-locale";
 const THEME_KEY = "tafasil-theme";
 
+const defaultValue: AppContextValue = {
+  locale: "ar",
+  theme: "dark",
+  t: translations.ar,
+  dir: "rtl",
+  mounted: false,
+  setLocale: () => {},
+  toggleLocale: () => {},
+  setTheme: () => {},
+  toggleTheme: () => {},
+};
+
 export function AppProviders({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>("ar");
   const [theme, setThemeState] = useState<Theme>("dark");
-  const [ready, setReady] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const savedLocale = window.localStorage.getItem(LOCALE_KEY) as Locale | null;
-    const savedTheme = window.localStorage.getItem(THEME_KEY) as Theme | null;
+    try {
+      const savedLocale = window.localStorage.getItem(LOCALE_KEY) as Locale | null;
+      const savedTheme = window.localStorage.getItem(THEME_KEY) as Theme | null;
 
-    if (savedLocale === "ar" || savedLocale === "en") setLocaleState(savedLocale);
-    // Default theme is dark; only override when user explicitly saved a preference
-    if (savedTheme === "light" || savedTheme === "dark") {
-      setThemeState(savedTheme);
-    } else {
-      setThemeState("dark");
+      if (savedLocale === "ar" || savedLocale === "en") {
+        setLocaleState(savedLocale);
+      }
+      if (savedTheme === "light" || savedTheme === "dark") {
+        setThemeState(savedTheme);
+      }
+    } catch {
+      // private mode / blocked storage — keep defaults
     }
-    setReady(true);
+    setMounted(true);
   }, []);
 
   useEffect(() => {
+    if (!mounted || typeof document === "undefined") return;
     const root = document.documentElement;
     root.lang = locale;
     root.dir = locale === "ar" ? "rtl" : "ltr";
     root.classList.toggle("dark", theme === "dark");
-    if (ready) {
+    try {
       window.localStorage.setItem(LOCALE_KEY, locale);
       window.localStorage.setItem(THEME_KEY, theme);
+    } catch {
+      // ignore
     }
-  }, [locale, theme, ready]);
+  }, [locale, theme, mounted]);
 
   const setLocale = useCallback((next: Locale) => setLocaleState(next), []);
   const toggleLocale = useCallback(
@@ -78,14 +97,15 @@ export function AppProviders({ children }: { children: ReactNode }) {
     () => ({
       locale,
       theme,
-      t: translations[locale],
+      t: translations[locale] ?? translations.ar,
       dir: locale === "ar" ? "rtl" : "ltr",
+      mounted,
       setLocale,
       toggleLocale,
       setTheme,
       toggleTheme,
     }),
-    [locale, theme, setLocale, toggleLocale, setTheme, toggleTheme]
+    [locale, theme, mounted, setLocale, toggleLocale, setTheme, toggleTheme]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
@@ -93,6 +113,6 @@ export function AppProviders({ children }: { children: ReactNode }) {
 
 export function useApp() {
   const ctx = useContext(AppContext);
-  if (!ctx) throw new Error("useApp must be used within AppProviders");
-  return ctx;
+  // Never throw during edge prerender — return safe defaults instead of blanking the tree
+  return ctx ?? defaultValue;
 }
