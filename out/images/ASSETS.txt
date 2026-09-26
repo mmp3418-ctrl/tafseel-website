@@ -1,0 +1,9 @@
+# Product & project media — exact names used by src/lib/product-catalog.ts
+#
+# Electric:  t1.jpeg … t10.jpeg  + videos/v3.mp4
+# Manual:    y1.jpeg … y10.jpeg  + videos/v4.mp4, v5.mp4
+# Braccio:   k1.jpeg … k15.jpeg
+# Pyramid:   n1.jpeg … n15.jpeg
+# Sail:      i1.jpeg … i20.jpeg  + videos/v6–v10.mp4, intro v11.mp4
+# Arched:    q1.jpeg … q5.jpeg
+# Projects:  t1, t2, q4, q3, n3, n5, y3, y2 (.jpeg)

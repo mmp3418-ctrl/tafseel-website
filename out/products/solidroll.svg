@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1a1a1a"/>
+      <stop offset="100%" stop-color="#0d0d0d"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c8e0f0" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#6a90a8" stop-opacity="0.2"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="900" fill="url(#bg)"/>
+  <rect x="280" y="80" width="640" height="40" rx="4" fill="#2a2a2a"/>
+  <rect x="300" y="92" width="600" height="8" rx="2" fill="#D4AF37" opacity="0.6"/>
+  <g>
+    <!-- dense narrow slats -->
+    <rect x="300" y="140" width="600" height="18" fill="url(#glass)" stroke="#a8c8d8" stroke-opacity="0.35"/>
+    <rect x="300" y="162" width="600" height="18" fill="url(#glass)" stroke="#a8c8d8" stroke-opacity="0.35"/>
+    <rect x="300" y="184" width="600" height="18" fill="url(#glass)" stroke="#a8c8d8" stroke-opacity="0.35"/>
+    <rect x="300" y="206" width="600" height="18" fill="url(#glass)" stroke="#a8c8d8" stroke-opacity="0.35"/>
+    <rect x="300" y="228" width="600" height="18" fill="url(#glass)" stroke="#a8c8d8" stroke-opacity="0.35"/>
+    <rect x="300" y="250" width="600" height="18" fill="url(#glass)" stroke="#a8c8d8" stroke-opacity="0.35"/>
+    <rect x="300" y="272" width="600" height="18" fill="url(#glass)" stroke="#a8c8d8" stroke-opacity="0.35"/>
+    <rect x="300" y="294" width="600" height="18" fill="url(#glass)" stroke="#a8c8d8" stroke-opacity="0.35"/>
+    <rect x="300" y="316" width="600" height="18" fill="url(#glass)" stroke="#a8c8d8" stroke-opacity="0.35"/>
+    <rect x="300" y="338" width="600" height="18" fill="url(#glass)" stroke="#a8c8d8" stroke-opacity="0.35"/>
+    <rect x="300" y="360" width="600" height="18" fill="url(#glass)" stroke="#a8c8d8" stroke-opacity="0.35"/>
+    <rect x="300" y="382" width="600" height="18" fill="url(#glass)" stroke="#a8c8d8" stroke-opacity="0.35"/>
+    <rect x="300" y="404" width="600" height="18" fill="url(#glass)" stroke="#a8c8d8" stroke-opacity="0.35"/>
+    <rect x="300" y="426" width="600" height="18" fill="url(#glass)" stroke="#a8c8d8" stroke-opacity="0.35"/>
+    <rect x="300" y="448" width="600" height="18" fill="url(#glass)" stroke="#a8c8d8" stroke-opacity="0.35"/>
+    <rect x="300" y="470" width="600" height="18" fill="url(#glass)" stroke="#a8c8d8" stroke-opacity="0.35"/>
+    <rect x="300" y="492" width="600" height="18" fill="url(#glass)" stroke="#a8c8d8" stroke-opacity="0.35"/>
+    <rect x="300" y="514" width="600" height="18" fill="url(#glass)" stroke="#a8c8d8" stroke-opacity="0.35"/>
+    <rect x="300" y="536" width="600" height="18" fill="url(#glass)" stroke="#a8c8d8" stroke-opacity="0.35"/>
+    <rect x="300" y="558" width="600" height="18" fill="url(#glass)" stroke="#a8c8d8" stroke-opacity="0.35"/>
+    <rect x="300" y="580" width="600" height="18" fill="url(#glass)" stroke="#a8c8d8" stroke-opacity="0.35"/>
+    <rect x="300" y="602" width="600" height="18" fill="url(#glass)" stroke="#a8c8d8" stroke-opacity="0.35"/>
+    <rect x="300" y="624" width="600" height="18" fill="url(#glass)" stroke="#a8c8d8" stroke-opacity="0.35"/>
+    <rect x="300" y="646" width="600" height="18" fill="url(#glass)" stroke="#a8c8d8" stroke-opacity="0.35"/>
+    <rect x="300" y="668" width="600" height="18" fill="url(#glass)" stroke="#a8c8d8" stroke-opacity="0.35"/>
+    <rect x="300" y="690" width="600" height="18" fill="url(#glass)" stroke="#a8c8d8" stroke-opacity="0.35"/>
+    <rect x="300" y="712" width="600" height="18" fill="url(#glass)" stroke="#a8c8d8" stroke-opacity="0.35"/>
+    <rect x="300" y="734" width="600" height="18" fill="url(#glass)" stroke="#a8c8d8" stroke-opacity="0.35"/>
+  </g>
+  <rect x="280" y="140" width="20" height="620" fill="#2a2a2a"/>
+  <rect x="900" y="140" width="20" height="620" fill="#2a2a2a"/>
+  <rect x="280" y="760" width="640" height="24" fill="#2a2a2a"/>
+</svg>

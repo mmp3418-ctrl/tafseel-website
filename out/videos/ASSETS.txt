@@ -1,0 +1,6 @@
+# Product category videos
+#
+# v3.mp4              — electric
+# v4.mp4, v5.mp4      — manual
+# v6.mp4 … v10.mp4    — sail gallery
+# v11.mp4             — featured sail intro
