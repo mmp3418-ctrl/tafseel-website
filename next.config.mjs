@@ -1,16 +1,13 @@
 /** @type {import('next').NextConfig} */
-const basePath = process.env.NODE_ENV === "production" ? "/tafseel-website" : "";
-
 const nextConfig = {
   output: "export",
-  basePath,
-  assetPrefix: basePath,
+  basePath: "/tafseel-website",
   images: {
     unoptimized: true,
   },
   trailingSlash: true,
   env: {
-    NEXT_PUBLIC_BASE_PATH: basePath,
+    NEXT_PUBLIC_BASE_PATH: "/tafseel-website",
   },
 };
 

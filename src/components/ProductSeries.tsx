@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { COMPANY } from "@/lib/products";
 import { useApp } from "@/components/providers/AppProviders";
 import PublicMediaImg from "@/components/PublicMediaImg";
+import { HOMEPAGE_FEATURED_IMAGES } from "@/lib/product-catalog";
 
 export default function ProductSeries() {
   const { t, dir } = useApp();
@@ -13,13 +14,13 @@ export default function ProductSeries() {
     () => [
       {
         id: 1,
-        image: "/j7.jpeg",
+        image: HOMEPAGE_FEATURED_IMAGES[0],
         title: t.products.card1Title,
         description: t.products.card1Desc,
       },
       {
         id: 2,
-        image: "/j8.jpeg",
+        image: HOMEPAGE_FEATURED_IMAGES[1],
         title: t.products.card2Title,
         description: t.products.card2Desc,
       },

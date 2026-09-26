@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && node scripts/post-export.mjs",
-    "deploy": "npm run build && gh-pages -d out -t true",
+    "build": "next build && node scripts/post-export.mjs && node -e \"require('fs').writeFileSync('out/.nojekyll', '')\"",
     "start": "next start",
+    "deploy": "npm run build && npx gh-pages -d out --nojekyll -f",
+    "deploy:safe": "npm run build && npx gh-pages -d out --nojekyll",
     "lint": "eslint"
   },
   "dependencies": {

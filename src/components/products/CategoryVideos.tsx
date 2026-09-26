@@ -1,12 +1,11 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { asset } from "@/lib/assets";
+import PublicMediaVideo from "@/components/PublicMediaVideo";
 
 type CategoryVideosProps = {
   videos: string[];
   featuredVideo?: { src: string; title: string };
-  /** Bumps when category changes so playback resets */
   resetKey: string;
 };
 
@@ -55,16 +54,13 @@ export default function CategoryVideos({
             </h3>
           ) : null}
           <div className="overflow-hidden rounded-xl bg-black">
-            <video
-              ref={(el) => {
-                refs.current[i] = el;
-              }}
-              controls
-              playsInline
-              preload="metadata"
+            <PublicMediaVideo
+              src={item.src}
               className="aspect-video w-full object-cover"
-              src={asset(item.src)}
-              onPlay={(e) => pauseOthers(e.currentTarget)}
+              onPlay={(el) => {
+                refs.current[i] = el;
+                pauseOthers(el);
+              }}
             />
           </div>
         </div>
