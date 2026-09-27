@@ -13,7 +13,6 @@ import { db } from "@/lib/firebase";
 type FirestoreProduct = {
   id: string;
   title: string;
-  price: string | number;
   category: string;
   description: string;
   mediaUrl: string;
@@ -27,16 +26,10 @@ type FirestoreCategory = {
 
 const ALL = "__all__";
 
-function formatPrice(price: string | number) {
-  if (price === "" || price == null) return null;
-  if (typeof price === "number") {
-    return `${price.toLocaleString("ar-LY")} د.ل`;
-  }
-  const asNum = Number(price);
-  if (Number.isFinite(asNum) && String(price).trim() !== "") {
-    return `${asNum.toLocaleString("ar-LY")} د.ل`;
-  }
-  return String(price);
+function isVideoFile(mediaUrl: string, mediaType: string): boolean {
+  if (mediaType === "video") return true;
+  if (!mediaUrl) return false;
+  return /\.(mp4|webm|ogg|mov|m4v)($|\?)/i.test(mediaUrl);
 }
 
 function MediaPreview({
@@ -56,7 +49,7 @@ function MediaPreview({
     );
   }
 
-  if (mediaType === "video") {
+  if (isVideoFile(mediaUrl, mediaType)) {
     return (
       <video
         src={mediaUrl}
@@ -128,7 +121,6 @@ export default function ProductsCatalog() {
           return {
             id: docSnap.id,
             title: String(data.title ?? ""),
-            price: data.price ?? "",
             category: String(data.category ?? ""),
             description: String(data.description ?? ""),
             mediaUrl: String(data.mediaUrl ?? ""),
@@ -161,9 +153,60 @@ export default function ProductsCatalog() {
     return products.filter((p) => p.category === activeCategory);
   }, [products, activeCategory]);
 
+  const { imagesList, videosList } = useMemo(() => {
+    const images: FirestoreProduct[] = [];
+    const videos: FirestoreProduct[] = [];
+
+    filtered.forEach((item) => {
+      if (isVideoFile(item.mediaUrl, item.mediaType)) {
+        videos.push(item);
+      } else {
+        images.push(item);
+      }
+    });
+
+    return { imagesList: images, videosList: videos };
+  }, [filtered]);
+
   const tabs = useMemo(
     () => [{ id: ALL, name: "الكل" }, ...categories.map((c) => ({ id: c.name, name: c.name }))],
     [categories]
+  );
+
+  const renderCard = (item: FirestoreProduct, index: number) => (
+    <motion.article
+      key={item.id}
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        delay: Math.min(index * 0.04, 0.35),
+        duration: 0.35,
+      }}
+      className="overflow-hidden rounded-2xl border border-[rgba(209,172,129,0.2)] bg-[#241E18] transition-all duration-300 hover:border-[#C3986E] hover:shadow-xl"
+    >
+      <div className="aspect-[16/11] overflow-hidden bg-[#1A1612]">
+        <MediaPreview
+          mediaUrl={item.mediaUrl}
+          mediaType={item.mediaType}
+          title={item.title}
+        />
+      </div>
+      <div className="space-y-2 p-4 sm:p-5" dir="rtl">
+        {item.category ? (
+          <span className="inline-block rounded-full border border-[#D1AC81]/30 px-2.5 py-0.5 text-xs font-semibold text-[#D1AC81]">
+            {item.category}
+          </span>
+        ) : null}
+        <h2 className="text-lg font-bold text-[#FAFBF9] sm:text-xl">
+          {item.title}
+        </h2>
+        {item.description ? (
+          <p className="text-sm leading-relaxed text-[#E2E8F0]/85">
+            {item.description}
+          </p>
+        ) : null}
+      </div>
+    </motion.article>
   );
 
   return (
@@ -221,50 +264,40 @@ export default function ProductsCatalog() {
                 لا توجد منتجات حالياً
               </p>
             ) : (
-              <div className="grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {filtered.map((item, index) => {
-                  const priceLabel = formatPrice(item.price);
-                  return (
-                    <motion.article
-                      key={item.id}
-                      initial={{ opacity: 0, y: 18 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{
-                        delay: Math.min(index * 0.04, 0.35),
-                        duration: 0.35,
-                      }}
-                      className="overflow-hidden rounded-2xl border border-[rgba(209,172,129,0.2)] bg-[#241E18] transition-all duration-300 hover:border-[#C3986E] hover:shadow-xl"
-                    >
-                      <div className="aspect-[16/11] overflow-hidden bg-[#1A1612]">
-                        <MediaPreview
-                          mediaUrl={item.mediaUrl}
-                          mediaType={item.mediaType}
-                          title={item.title}
-                        />
-                      </div>
-                      <div className="space-y-2 p-4 sm:p-5" dir="rtl">
-                        {item.category ? (
-                          <span className="inline-block rounded-full border border-[#D1AC81]/30 px-2.5 py-0.5 text-xs font-semibold text-[#D1AC81]">
-                            {item.category}
-                          </span>
-                        ) : null}
-                        <h2 className="text-lg font-bold text-[#FAFBF9] sm:text-xl">
-                          {item.title}
-                        </h2>
-                        {priceLabel ? (
-                          <p className="text-base font-semibold text-[#C3986E]">
-                            {priceLabel}
-                          </p>
-                        ) : null}
-                        {item.description ? (
-                          <p className="text-sm leading-relaxed text-[#E2E8F0]/85">
-                            {item.description}
-                          </p>
-                        ) : null}
-                      </div>
-                    </motion.article>
-                  );
-                })}
+              <div className="space-y-16">
+                {/* 📸 معرض الصور */}
+                {imagesList.length > 0 && (
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-3 border-r-4 border-[#C3986E] pr-3" dir="rtl">
+                      <h2 className="text-2xl font-bold text-[#FAFBF9] sm:text-3xl">
+                        معرض الصور
+                      </h2>
+                      <span className="text-xs font-semibold text-[#D1AC81] bg-[#241E18] px-2.5 py-1 rounded-full border border-[#D1AC81]/20">
+                        {imagesList.length}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+                      {imagesList.map((item, index) => renderCard(item, index))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 🎥 معرض الفيديوهات */}
+                {videosList.length > 0 && (
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-3 border-r-4 border-[#C3986E] pr-3" dir="rtl">
+                      <h2 className="text-2xl font-bold text-[#FAFBF9] sm:text-3xl">
+                        معرض الفيديوهات
+                      </h2>
+                      <span className="text-xs font-semibold text-[#D1AC81] bg-[#241E18] px-2.5 py-1 rounded-full border border-[#D1AC81]/20">
+                        {videosList.length}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+                      {videosList.map((item, index) => renderCard(item, index))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </>
