@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   collection,
   getDocs,
@@ -78,6 +78,17 @@ export default function ProductsCatalog() {
   const [activeCategory, setActiveCategory] = useState<string>(ALL);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const imagesScrollRef = useRef<HTMLDivElement>(null);
+  const videosScrollRef = useRef<HTMLDivElement>(null);
+
+  const scroll = (ref: React.RefObject<HTMLDivElement | null>, direction: "left" | "right") => {
+    if (ref.current) {
+      // التمرير لمسافة كارت واحد (حوالي 360px مع الفراغ)
+      const scrollAmount = direction === "left" ? -360 : 360;
+      ref.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -182,7 +193,7 @@ export default function ProductsCatalog() {
         delay: Math.min(index * 0.04, 0.35),
         duration: 0.35,
       }}
-      className="overflow-hidden rounded-2xl border border-[rgba(209,172,129,0.2)] bg-[#241E18] transition-all duration-300 hover:border-[#C3986E] hover:shadow-xl"
+      className="h-full overflow-hidden rounded-2xl border border-[rgba(209,172,129,0.2)] bg-[#241E18] transition-all duration-300 hover:border-[#C3986E] hover:shadow-xl"
     >
       <div className="aspect-[16/11] overflow-hidden bg-[#1A1612]">
         <MediaPreview
@@ -268,16 +279,51 @@ export default function ProductsCatalog() {
                 {/* 📸 معرض الصور */}
                 {imagesList.length > 0 && (
                   <div className="space-y-6">
-                    <div className="flex items-center gap-3 border-r-4 border-[#C3986E] pr-3" dir="rtl">
-                      <h2 className="text-2xl font-bold text-[#FAFBF9] sm:text-3xl">
-                        معرض الصور
-                      </h2>
-                      <span className="text-xs font-semibold text-[#D1AC81] bg-[#241E18] px-2.5 py-1 rounded-full border border-[#D1AC81]/20">
-                        {imagesList.length}
-                      </span>
+                    <div className="flex items-center justify-between border-r-4 border-[#C3986E] pr-3" dir="rtl">
+                      <div className="flex items-center gap-3">
+                        <h2 className="text-2xl font-bold text-[#FAFBF9] sm:text-3xl">
+                          معرض الصور
+                        </h2>
+                        <span className="text-xs font-semibold text-[#D1AC81] bg-[#241E18] px-2.5 py-1 rounded-full border border-[#D1AC81]/20">
+                          {imagesList.length}
+                        </span>
+                      </div>
+
+                      {/* أزرار الأسهم للصور */}
+                      <div className="flex items-center gap-2" dir="ltr">
+                        <button
+                          type="button"
+                          onClick={() => scroll(imagesScrollRef, "left")}
+                          aria-label="التالي"
+                          className="flex h-10 w-10 items-center justify-center rounded-full border border-[#D1AC81]/30 bg-[#241E18] text-[#D1AC81] transition-all duration-300 hover:border-[#C3986E] hover:bg-[#C3986E] hover:text-[#12100E]"
+                        >
+                          ‹
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => scroll(imagesScrollRef, "right")}
+                          aria-label="السابق"
+                          className="flex h-10 w-10 items-center justify-center rounded-full border border-[#D1AC81]/30 bg-[#241E18] text-[#D1AC81] transition-all duration-300 hover:border-[#C3986E] hover:bg-[#C3986E] hover:text-[#12100E]"
+                        >
+                          ›
+                        </button>
+                      </div>
                     </div>
-                    <div className="grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
-                      {imagesList.map((item, index) => renderCard(item, index))}
+
+                    {/* حاوية السلايدر للصور */}
+                    <div
+                      ref={imagesScrollRef}
+                      className="flex gap-5 overflow-x-auto scroll-smooth pb-4 no-scrollbar"
+                      dir="rtl"
+                    >
+                      {imagesList.map((item, index) => (
+                        <div
+                          key={item.id}
+                          className="w-[85vw] max-w-[340px] flex-shrink-0 sm:w-[320px] md:w-[340px]"
+                        >
+                          {renderCard(item, index)}
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}
@@ -285,16 +331,51 @@ export default function ProductsCatalog() {
                 {/* 🎥 معرض الفيديوهات */}
                 {videosList.length > 0 && (
                   <div className="space-y-6">
-                    <div className="flex items-center gap-3 border-r-4 border-[#C3986E] pr-3" dir="rtl">
-                      <h2 className="text-2xl font-bold text-[#FAFBF9] sm:text-3xl">
-                        معرض الفيديوهات
-                      </h2>
-                      <span className="text-xs font-semibold text-[#D1AC81] bg-[#241E18] px-2.5 py-1 rounded-full border border-[#D1AC81]/20">
-                        {videosList.length}
-                      </span>
+                    <div className="flex items-center justify-between border-r-4 border-[#C3986E] pr-3" dir="rtl">
+                      <div className="flex items-center gap-3">
+                        <h2 className="text-2xl font-bold text-[#FAFBF9] sm:text-3xl">
+                          معرض الفيديوهات
+                        </h2>
+                        <span className="text-xs font-semibold text-[#D1AC81] bg-[#241E18] px-2.5 py-1 rounded-full border border-[#D1AC81]/20">
+                          {videosList.length}
+                        </span>
+                      </div>
+
+                      {/* أزرار الأسهم للفيديوهات */}
+                      <div className="flex items-center gap-2" dir="ltr">
+                        <button
+                          type="button"
+                          onClick={() => scroll(videosScrollRef, "left")}
+                          aria-label="التالي"
+                          className="flex h-10 w-10 items-center justify-center rounded-full border border-[#D1AC81]/30 bg-[#241E18] text-[#D1AC81] transition-all duration-300 hover:border-[#C3986E] hover:bg-[#C3986E] hover:text-[#12100E]"
+                        >
+                          ‹
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => scroll(videosScrollRef, "right")}
+                          aria-label="السابق"
+                          className="flex h-10 w-10 items-center justify-center rounded-full border border-[#D1AC81]/30 bg-[#241E18] text-[#D1AC81] transition-all duration-300 hover:border-[#C3986E] hover:bg-[#C3986E] hover:text-[#12100E]"
+                        >
+                          ›
+                        </button>
+                      </div>
                     </div>
-                    <div className="grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
-                      {videosList.map((item, index) => renderCard(item, index))}
+
+                    {/* حاوية السلايدر للفيديوهات */}
+                    <div
+                      ref={videosScrollRef}
+                      className="flex gap-5 overflow-x-auto scroll-smooth pb-4 no-scrollbar"
+                      dir="rtl"
+                    >
+                      {videosList.map((item, index) => (
+                        <div
+                          key={item.id}
+                          className="w-[85vw] max-w-[340px] flex-shrink-0 sm:w-[320px] md:w-[340px]"
+                        >
+                          {renderCard(item, index)}
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}
