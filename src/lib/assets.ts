@@ -1,9 +1,9 @@
 /**
- * Public asset helper for GitHub Pages (`/tafseel-website`) static export.
- * Always produces absolute-from-site-root URLs including basePath.
+ * Public asset helper for custom domain (taafasel.ly).
+ * Always produces absolute URLs relative to root domain '/'.
  */
 export const BASE_PATH = (
-  process.env.NEXT_PUBLIC_BASE_PATH ?? "/tafseel-website"
+  process.env.NEXT_PUBLIC_BASE_PATH ?? ""
 ).replace(/\/$/, "");
 
 /** Force lowercase path segments + preferred image/video extensions */
@@ -11,9 +11,10 @@ function canonicalizeMediaPath(path: string): string {
   let p = path.trim().replace(/\\/g, "/");
   if (p.startsWith("./")) p = p.slice(1);
 
-  // Strip accidental basePath so we never double-prefix
-  if (BASE_PATH && (p === BASE_PATH || p.startsWith(`${BASE_PATH}/`))) {
-    p = p.slice(BASE_PATH.length) || "/";
+  // Strip accidental old basePath so we never double-prefix
+  const oldPrefix = "/tafseel-website";
+  if (p === oldPrefix || p.startsWith(`${oldPrefix}/`)) {
+    p = p.slice(oldPrefix.length) || "/";
   }
 
   if (!p.startsWith("/")) p = `/${p}`;
@@ -35,9 +36,9 @@ function canonicalizeMediaPath(path: string): string {
   return `${dir}${file}`;
 }
 
-/** Join basePath + public path → `/tafseel-website/images/t1.jpeg` */
+/** Join public path directly to root -> `/images/t1.jpeg` */
 export function asset(path: string): string {
-  if (!path) return `${BASE_PATH}/`;
+  if (!path) return "/";
   if (/^https?:\/\//i.test(path)) return path;
 
   const normalized = canonicalizeMediaPath(path);
@@ -56,9 +57,9 @@ function stripExt(path: string): { base: string; ext: string | null } {
 
 /**
  * Candidate URLs for a public media file.
- * - `t1.jpeg` → `/tafseel-website/images/t1.jpeg`
- * - `/images/y1.jpeg` → `/tafseel-website/images/y1.jpeg`
- * - `/videos/v3.mp4` → `/tafseel-website/videos/v3.mp4`
+ * - `t1.jpeg` → `/images/t1.jpeg`
+ * - `/images/y1.jpeg` → `/images/y1.jpeg`
+ * - `/videos/v3.mp4` → `/videos/v3.mp4`
  */
 export function mediaCandidates(path: string): string[] {
   let normalized = path.trim().replace(/\\/g, "/");
