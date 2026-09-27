@@ -14,6 +14,11 @@ import {
   type Locale,
   type TranslationDict,
 } from "@/lib/i18n";
+import {
+  DEFAULT_HOME_SETTINGS,
+  loadHomeSettings,
+  type HomeSettings,
+} from "@/lib/home-settings";
 
 type Theme = "light" | "dark";
 
@@ -23,6 +28,8 @@ type AppContextValue = {
   t: TranslationDict;
   dir: "rtl" | "ltr";
   mounted: boolean;
+  site: HomeSettings;
+  siteReady: boolean;
   setLocale: (locale: Locale) => void;
   toggleLocale: () => void;
   setTheme: (theme: Theme) => void;
@@ -40,6 +47,8 @@ const defaultValue: AppContextValue = {
   t: translations.ar,
   dir: "rtl",
   mounted: false,
+  site: DEFAULT_HOME_SETTINGS,
+  siteReady: false,
   setLocale: () => {},
   toggleLocale: () => {},
   setTheme: () => {},
@@ -50,6 +59,8 @@ export function AppProviders({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>("ar");
   const [theme, setThemeState] = useState<Theme>("dark");
   const [mounted, setMounted] = useState(false);
+  const [site, setSite] = useState<HomeSettings>(DEFAULT_HOME_SETTINGS);
+  const [siteReady, setSiteReady] = useState(false);
 
   useEffect(() => {
     try {
@@ -66,6 +77,22 @@ export function AppProviders({ children }: { children: ReactNode }) {
       // private mode / blocked storage — keep defaults
     }
     setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    loadHomeSettings()
+      .then((settings) => {
+        if (cancelled) return;
+        setSite(settings);
+        setSiteReady(true);
+      })
+      .catch(() => {
+        if (!cancelled) setSiteReady(true);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -100,12 +127,24 @@ export function AppProviders({ children }: { children: ReactNode }) {
       t: translations[locale] ?? translations.ar,
       dir: locale === "ar" ? "rtl" : "ltr",
       mounted,
+      site,
+      siteReady,
       setLocale,
       toggleLocale,
       setTheme,
       toggleTheme,
     }),
-    [locale, theme, mounted, setLocale, toggleLocale, setTheme, toggleTheme]
+    [
+      locale,
+      theme,
+      mounted,
+      site,
+      siteReady,
+      setLocale,
+      toggleLocale,
+      setTheme,
+      toggleTheme,
+    ]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowUp } from "lucide-react";
 import { COMPANY } from "@/lib/products";
+import { branchLocationLine } from "@/lib/home-settings";
 import { useApp } from "@/components/providers/AppProviders";
 import BrandLogo from "@/components/BrandLogo";
 import CatalogDownloadLink from "@/components/CatalogDownloadLink";
@@ -25,19 +26,49 @@ function TikTokIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+function InstagramIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+      <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm5 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm6.5-.9a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2zM12 9a3 3 0 1 1 0 6 3 3 0 0 1 0-6z" />
+    </svg>
+  );
+}
+
+function YoutubeIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+      <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31.5 31.5 0 0 0 0 12a31.5 31.5 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31.5 31.5 0 0 0 24 12a31.5 31.5 0 0 0-.5-5.8zM9.8 15.5v-7l6.2 3.5-6.2 3.5z" />
+    </svg>
+  );
+}
+
+const socialBtnClass =
+  "flex h-10 w-10 items-center justify-center rounded-full border border-[#C3986E]/40 bg-[#C3986E]/10 text-[#D1AC81] transition hover:scale-105 hover:border-[#C3986E] hover:bg-[#C3986E] hover:text-[#FAFBF9]";
+
 export default function Footer() {
-  const { t, locale, dir } = useApp();
+  const { t, locale, dir, site } = useApp();
   const [showTop, setShowTop] = useState(false);
 
-  const quickLinks = useMemo(
-    () => [
+  const brandName = locale === "ar" ? site.companyNameAr : site.companyNameEn;
+  const phone = site.phone || COMPANY.phone;
+  const phoneTel = site.phoneTel || COMPANY.phoneTel;
+  const locations =
+    site.branches?.length > 0
+      ? site.branches.map(branchLocationLine)
+      : [...COMPANY.locations];
+
+  const quickLinks = useMemo(() => {
+    const links: { href: string; label: string }[] = [
       { href: "/products/", label: t?.nav?.products ?? "المنتجات" },
       { href: "/projects/", label: t?.nav?.projects ?? "المشاريع" },
       { href: "/customize/", label: t?.nav?.custom ?? "التخصيص" },
       { href: "/#contact", label: t?.nav?.contact ?? "تواصل" },
-    ],
-    [t]
-  );
+    ];
+    if (site.customLinkUrl && site.customLinkLabel) {
+      links.push({ href: site.customLinkUrl, label: site.customLinkLabel });
+    }
+    return links;
+  }, [t, site.customLinkUrl, site.customLinkLabel]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -69,34 +100,59 @@ export default function Footer() {
                 className="group inline-flex items-center rounded-xl bg-transparent p-1 transition hover:scale-[1.02]"
               >
                 <BrandLogo
-                  alt={locale === "ar" ? COMPANY.nameAr : COMPANY.shortName}
+                  alt={brandName || COMPANY.nameAr}
                   className="relative h-14 w-auto max-h-20 object-contain drop-shadow-[0_2px_8px_rgba(209,172,129,0.35)] transition-all duration-300 sm:h-16 lg:h-20"
                 />
               </Link>
               <p className="mt-5 max-w-md text-sm leading-relaxed text-[#E2E8F0] drop-shadow-sm">
-                {locale === "ar" ? COMPANY.nameAr : COMPANY.shortName} —{" "}
-                {t.footer.blurb}
+                {brandName || COMPANY.nameAr} — {site.footerBlurb || t.footer.blurb}
               </p>
 
-              <div className="mt-6 flex items-center gap-2">
-                <a
-                  href={COMPANY.social.facebook}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Facebook"
-                  className="flex h-10 w-10 items-center justify-center rounded-full border border-[#C3986E]/40 bg-[#C3986E]/10 text-[#D1AC81] transition hover:scale-105 hover:border-[#C3986E] hover:bg-[#C3986E] hover:text-[#FAFBF9]"
-                >
-                  <FacebookIcon className="h-4 w-4" />
-                </a>
-                <a
-                  href={COMPANY.social.tiktok}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="TikTok"
-                  className="flex h-10 w-10 items-center justify-center rounded-full border border-[#C3986E]/40 bg-[#C3986E]/10 text-[#D1AC81] transition hover:scale-105 hover:border-[#C3986E] hover:bg-[#C3986E] hover:text-[#FAFBF9]"
-                >
-                  <TikTokIcon className="h-4 w-4" />
-                </a>
+              <div className="mt-6 flex flex-wrap items-center gap-2">
+                {site.facebook ? (
+                  <a
+                    href={site.facebook}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Facebook"
+                    className={socialBtnClass}
+                  >
+                    <FacebookIcon className="h-4 w-4" />
+                  </a>
+                ) : null}
+                {site.tiktok ? (
+                  <a
+                    href={site.tiktok}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="TikTok"
+                    className={socialBtnClass}
+                  >
+                    <TikTokIcon className="h-4 w-4" />
+                  </a>
+                ) : null}
+                {site.instagram ? (
+                  <a
+                    href={site.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Instagram"
+                    className={socialBtnClass}
+                  >
+                    <InstagramIcon className="h-4 w-4" />
+                  </a>
+                ) : null}
+                {site.youtube ? (
+                  <a
+                    href={site.youtube}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="YouTube"
+                    className={socialBtnClass}
+                  >
+                    <YoutubeIcon className="h-4 w-4" />
+                  </a>
+                ) : null}
               </div>
             </div>
 
@@ -105,16 +161,30 @@ export default function Footer() {
                 {t.footer.quickLinks}
               </p>
               <ul className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm">
-                {quickLinks.map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className="text-[#E2E8F0] transition hover:text-[#D1AC81]"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
+                {quickLinks.map((link) => {
+                  const external = /^https?:\/\//i.test(link.href);
+                  return (
+                    <li key={`${link.href}-${link.label}`}>
+                      {external ? (
+                        <a
+                          href={link.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[#E2E8F0] transition hover:text-[#D1AC81]"
+                        >
+                          {link.label}
+                        </a>
+                      ) : (
+                        <Link
+                          href={link.href}
+                          className="text-[#E2E8F0] transition hover:text-[#D1AC81]"
+                        >
+                          {link.label}
+                        </Link>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
 
@@ -125,18 +195,26 @@ export default function Footer() {
               <ul className="space-y-3 text-sm">
                 <li>
                   <a
-                    href={`tel:${COMPANY.phoneTel}`}
+                    href={`tel:${phoneTel}`}
                     className="font-medium text-[#FFFFFF] transition hover:text-[#D1AC81]"
                     dir="ltr"
                   >
-                    {COMPANY.phone}
+                    {phone}
                   </a>
                 </li>
-                {COMPANY.locations.map((loc) => (
-                  <li
-                    key={loc}
-                    className="leading-relaxed text-[#E2E8F0]/90"
-                  >
+                {site.email ? (
+                  <li>
+                    <a
+                      href={`mailto:${site.email}`}
+                      className="font-medium text-[#FFFFFF] transition hover:text-[#D1AC81]"
+                      dir="ltr"
+                    >
+                      {site.email}
+                    </a>
+                  </li>
+                ) : null}
+                {locations.map((loc) => (
+                  <li key={loc} className="leading-relaxed text-[#E2E8F0]/90">
                     {loc}
                   </li>
                 ))}
@@ -155,10 +233,11 @@ export default function Footer() {
             dir={dir}
           >
             <p className="text-[#FAFBF9]">
-              {locale === "ar" ? COMPANY.nameAr : COMPANY.shortName}
+              {brandName || (locale === "ar" ? COMPANY.nameAr : COMPANY.shortName)}
             </p>
             <p>
-              © {new Date().getFullYear()} {COMPANY.shortName}. {t.footer.rights}
+              © {new Date().getFullYear()} {site.companyNameEn || COMPANY.shortName}.{" "}
+              {t.footer.rights}
             </p>
           </div>
         </div>

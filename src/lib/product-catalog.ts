@@ -141,12 +141,6 @@ export const PRODUCT_CATEGORIES: ProductCategory[] = [
   },
 ];
 
-/** Homepage featured product cards — primary showcase (lowercase .jpeg) */
-export const HOMEPAGE_FEATURED_IMAGES = [
-  "/images/y1.jpeg",
-  "/images/i1.jpeg",
-] as const;
-
 /** Projects gallery — filenames resolve under /images/ via PublicMediaImg */
 export const PROJECT_GALLERY_IMAGES = [
   "t1.jpeg",

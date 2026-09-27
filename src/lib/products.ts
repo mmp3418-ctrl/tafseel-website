@@ -136,10 +136,13 @@ export function calculatePrice(config: ConfigState): PriceBreakdown {
   };
 }
 
+/**
+ * تنسيق المبالغ بالدينار الليبي
+ */
 export function formatSAR(amount: number): string {
-  return new Intl.NumberFormat("ar-SA", {
+  return new Intl.NumberFormat("ar-LY", {
     style: "currency",
-    currency: "SAR",
+    currency: "LYD",
     maximumFractionDigits: 0,
   }).format(amount);
 }

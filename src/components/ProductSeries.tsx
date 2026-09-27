@@ -5,28 +5,33 @@ import { motion } from "framer-motion";
 import { COMPANY } from "@/lib/products";
 import { useApp } from "@/components/providers/AppProviders";
 import PublicMediaImg from "@/components/PublicMediaImg";
-import { HOMEPAGE_FEATURED_IMAGES } from "@/lib/product-catalog";
+import { asset } from "@/lib/assets";
+import type { HomeSettings } from "@/lib/home-settings";
 
-export default function ProductSeries() {
-  const { t, dir } = useApp();
+export default function ProductSeries({
+  home,
+  homeReady = true,
+}: {
+  home?: HomeSettings | null;
+  homeReady?: boolean;
+}) {
+  const { t, dir, site } = useApp();
+  const data = home ?? site;
 
-  const series = useMemo(
-    () => [
-      {
-        id: 1,
-        image: HOMEPAGE_FEATURED_IMAGES[0],
-        title: t.products.card1Title,
-        description: t.products.card1Desc,
-      },
-      {
-        id: 2,
-        image: HOMEPAGE_FEATURED_IMAGES[1],
-        title: t.products.card2Title,
-        description: t.products.card2Desc,
-      },
-    ],
-    [t]
-  );
+  const series = useMemo(() => {
+    const saved = data?.featured ?? [];
+    return [0, 1].map((index) => ({
+      id: index + 1,
+      image: saved[index]?.mediaUrl || "",
+      mediaType: saved[index]?.mediaType || "image",
+      title:
+        saved[index]?.title ||
+        (index === 0 ? t.products.card1Title : t.products.card2Title),
+      description:
+        saved[index]?.description ||
+        (index === 0 ? t.products.card1Desc : t.products.card2Desc),
+    }));
+  }, [data, t]);
 
   return (
     <section id="products" className="bg-gold-mesh py-12 sm:py-20 lg:py-32">
@@ -39,10 +44,12 @@ export default function ProductSeries() {
           className="mb-8 text-center sm:mb-14"
         >
           <h2 className="text-2xl font-bold sm:text-4xl lg:text-5xl">
-            <span className="text-gradient-gold">{t.products.title}</span>
+            <span className="text-gradient-gold">
+              {data?.productsTitle || t.products.title}
+            </span>
           </h2>
           <p className="mx-auto mt-3 max-w-2xl px-2 text-sm leading-relaxed text-brand-text-light sm:mt-4 sm:text-base">
-            {t.products.subtitle}
+            {data?.productsSubtitle || t.products.subtitle}
           </p>
         </motion.div>
 
@@ -52,8 +59,10 @@ export default function ProductSeries() {
               key={item.id}
               item={item}
               index={i}
-              orderLabel={t.products.orderNow}
+              orderLabel={data?.orderLabel || t.products.orderNow}
+              whatsappUrl={data?.whatsappUrl || site.whatsappUrl || COMPANY.whatsappUrl}
               dir={dir}
+              loading={!homeReady}
             />
           ))}
         </div>
@@ -66,13 +75,32 @@ function SeriesCard({
   item,
   index,
   orderLabel,
+  whatsappUrl,
   dir,
+  loading,
 }: {
-  item: { id: number; image: string; title: string; description: string };
+  item: {
+    id: number;
+    image: string;
+    mediaType: string;
+    title: string;
+    description: string;
+  };
   index: number;
   orderLabel: string;
+  whatsappUrl: string;
   dir: "rtl" | "ltr";
+  loading: boolean;
 }) {
+  const isVideo =
+    item.mediaType === "video" ||
+    /\.(mp4|webm|ogg|mov|m4v)(?:$|[?#])/i.test(item.image);
+  const mediaSrc = item.image
+    ? /^https?:|^data:|^blob:/i.test(item.image)
+      ? item.image
+      : asset(item.image)
+    : "";
+
   return (
     <motion.article
       initial={{ opacity: 0, y: 28 }}
@@ -83,12 +111,28 @@ function SeriesCard({
       className="overflow-hidden rounded-2xl border border-[rgba(209,172,129,0.2)] bg-[#241E18] p-3 transition-all duration-300 hover:border-[#C3986E] hover:shadow-xl sm:rounded-3xl sm:p-6"
     >
       <div className="mb-4 overflow-hidden rounded-xl bg-[#1A1612] sm:mb-6">
-        <PublicMediaImg
-          src={item.image}
-          alt={item.title}
-          className="h-48 w-full object-cover transition-transform duration-500 hover:scale-105 sm:h-64"
-          loading="lazy"
-        />
+        {loading ? (
+          <div className="h-48 w-full animate-pulse bg-[#2A231C] sm:h-64" aria-hidden />
+        ) : isVideo && mediaSrc ? (
+          <video
+            src={mediaSrc}
+            controls
+            playsInline
+            preload="metadata"
+            className="h-48 w-full object-cover sm:h-64"
+          />
+        ) : mediaSrc ? (
+          <PublicMediaImg
+            src={item.image}
+            alt={item.title}
+            className="h-48 w-full object-cover transition-transform duration-500 hover:scale-105 sm:h-64"
+            loading="lazy"
+          />
+        ) : (
+          <div className="flex h-48 w-full items-center justify-center bg-[#1A1612] text-xs text-[#E2E8F0]/40 sm:h-64">
+            لا توجد صورة
+          </div>
+        )}
       </div>
 
       <div className="px-1 sm:px-0" dir={dir}>
@@ -100,7 +144,7 @@ function SeriesCard({
         </p>
 
         <a
-          href={COMPANY.whatsappUrl}
+          href={whatsappUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="mt-4 flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-[#C3986E] to-[#85633E] py-3 text-center text-sm font-bold text-white shadow-md transition-all hover:scale-[1.02] hover:opacity-95 sm:mt-6 sm:py-3.5"

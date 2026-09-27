@@ -5,17 +5,28 @@ import { COMPANY } from "@/lib/products";
 import { useApp } from "@/components/providers/AppProviders";
 import { asset } from "@/lib/assets";
 import { useIsMounted } from "@/hooks/useIsMounted";
+import { resolveMediaSrc, type HomeSettings } from "@/lib/home-settings";
 
 interface HeroProps {
   onOpenContact?: () => void;
+  home?: HomeSettings | null;
+  homeReady?: boolean;
 }
 
 const LOOP_SECONDS = 20;
 
-export default function Hero(_props: HeroProps) {
-  const { t, dir } = useApp();
+export default function Hero({ home }: HeroProps) {
+  const { t, dir, site } = useApp();
+  const data = home ?? site;
   const mounted = useIsMounted();
   const videoRef = useRef<HTMLVideoElement>(null);
+  const rawVideo = data?.heroVideoUrl?.trim() || "";
+  const resolved = resolveMediaSrc(rawVideo);
+  const videoSrc = resolved
+    ? /^https?:|^data:|^blob:/i.test(resolved)
+      ? resolved
+      : asset(resolved)
+    : "";
 
   const handleTimeUpdate = () => {
     const video = videoRef.current;
@@ -26,29 +37,38 @@ export default function Hero(_props: HeroProps) {
     }
   };
 
-  const badge = t?.hero?.badge || "الفخامة والابتكار المعماري للمظلات";
-  const title = t?.hero?.title || "نبتكر الظل.. لنصنع الفخامة المعمارية";
+  const badge = data?.heroBadge || t?.hero?.badge || "الفخامة والابتكار المعماري للمظلات";
+  const title = data?.heroTitle || t?.hero?.title || "نبتكر الظل.. لنصنع الفخامة المعمارية";
   const subtitle =
+    data?.heroSubtitle ||
     t?.hero?.subtitle ||
     "أنظمة مظلات حديثة وهياكل معمارية متطورة مصممة بأعلى معايير الأناقة والمتانة للمنازل والمنشآت الفاخرة في ليبيا.";
-  const ctaWhatsapp = t?.hero?.ctaWhatsapp || "تواصل معنا عبر واتساب";
-  const ctaProjects = t?.hero?.ctaProjects || "استكشف مشاريعنا";
+  const ctaWhatsapp = data?.ctaWhatsapp || t?.hero?.ctaWhatsapp || "تواصل معنا عبر واتساب";
+  const ctaProjects = data?.ctaProjects || t?.hero?.ctaProjects || "استكشف مشاريعنا";
+  const whatsappHref = data?.whatsappUrl || site.whatsappUrl || COMPANY.whatsappUrl;
 
   return (
     <section id="hero" className="relative isolate">
       <div className="relative flex min-h-[85vh] w-full items-center justify-center overflow-hidden sm:min-h-[92vh]">
-        <video
-          ref={videoRef}
-          autoPlay
-          muted
-          playsInline
-          onTimeUpdate={handleTimeUpdate}
-          className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover opacity-60 mix-blend-overlay"
-          aria-hidden
-        >
-          <source src={asset("/vo.mp4")} type="video/mp4" />
-          <source src={asset("/vo.webm")} type="video/webm" />
-        </video>
+        {videoSrc ? (
+          <video
+            key={videoSrc}
+            ref={videoRef}
+            autoPlay
+            muted
+            playsInline
+            onTimeUpdate={handleTimeUpdate}
+            className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover opacity-60 mix-blend-overlay"
+            aria-hidden
+          >
+            <source src={videoSrc} type="video/mp4" />
+          </video>
+        ) : (
+          <div
+            className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_center,_rgba(195,152,110,0.22),_transparent_60%),linear-gradient(180deg,#1A1612_0%,#12100E_100%)]"
+            aria-hidden
+          />
+        )}
 
         <div
           className="absolute inset-0 z-10 bg-gradient-to-t from-black/70 via-black/40 to-transparent"
@@ -85,7 +105,7 @@ export default function Hero(_props: HeroProps) {
 
             <div className="flex w-full flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center sm:gap-4">
               <a
-                href={COMPANY.whatsappUrl}
+                href={whatsappHref}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full rounded-full bg-gradient-to-r from-[#C3986E] to-[#D1AC81] px-6 py-3.5 text-center text-sm font-bold text-[#3E2E1F] shadow-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl sm:w-auto sm:px-8 sm:py-4 sm:text-base"

@@ -15,12 +15,17 @@ export default function CatalogDownloadLink({
   className = DEFAULT_CLASS,
   label,
 }: CatalogDownloadLinkProps) {
-  const { t } = useApp();
+  const { t, site } = useApp();
+  const href = site.catalogUrl
+    ? /^https?:\/\//i.test(site.catalogUrl)
+      ? site.catalogUrl
+      : asset(site.catalogUrl)
+    : asset("/catalog.pdf");
 
   return (
     <a
-      href={asset("/catalog.pdf")}
-      download="Tafseel-Shades-Catalog.pdf"
+      href={href}
+      download={site.catalogUrl ? undefined : "Tafseel-Shades-Catalog.pdf"}
       target="_blank"
       rel="noopener noreferrer"
       className={className}

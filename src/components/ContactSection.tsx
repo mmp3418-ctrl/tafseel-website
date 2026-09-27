@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { MapPin, MessageCircle, Phone } from "lucide-react";
 import { COMPANY } from "@/lib/products";
 import { useApp } from "@/components/providers/AppProviders";
+import type { HomeSettings } from "@/lib/home-settings";
 import type { SVGProps } from "react";
 
 function FacebookIcon(props: SVGProps<SVGSVGElement>) {
@@ -22,21 +23,51 @@ function TikTokIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
-export default function ContactSection() {
-  const { t, dir } = useApp();
+function InstagramIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+      <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm5 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm6.5-.9a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2zM12 9a3 3 0 1 1 0 6 3 3 0 0 1 0-6z" />
+    </svg>
+  );
+}
 
-  const branches = [
-    {
-      title: t.contact.branch1,
-      area: t.contact.branch1Area,
-      detail: t.contact.branch1Detail,
-    },
-    {
-      title: t.contact.branch2,
-      area: t.contact.branch2Area,
-      detail: t.contact.branch2Detail,
-    },
-  ];
+function YoutubeIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+      <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31.5 31.5 0 0 0 0 12a31.5 31.5 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31.5 31.5 0 0 0 24 12a31.5 31.5 0 0 0-.5-5.8zM9.8 15.5v-7l6.2 3.5-6.2 3.5z" />
+    </svg>
+  );
+}
+
+const socialBtnClass =
+  "flex h-12 w-12 items-center justify-center rounded-full border border-[#D1AC81]/35 bg-brand-surface text-[#C3986E] shadow-md transition hover:scale-105 hover:border-[#C3986E] hover:bg-[#C3986E] hover:text-[#FAFBF9]";
+
+export default function ContactSection({ home }: { home?: HomeSettings | null }) {
+  const { t, dir, site } = useApp();
+  const data = home ?? site;
+
+  const branches = data?.branches?.length
+    ? data.branches
+    : [
+        {
+          title: t.contact.branch1,
+          area: t.contact.branch1Area,
+          detail: t.contact.branch1Detail,
+        },
+        {
+          title: t.contact.branch2,
+          area: t.contact.branch2Area,
+          detail: t.contact.branch2Detail,
+        },
+      ];
+  const phone = data?.phone || COMPANY.phone;
+  const phoneTel = data?.phoneTel || COMPANY.phoneTel;
+  const whatsappUrl = data?.whatsappUrl || COMPANY.whatsappUrl;
+  const facebook = data?.facebook || COMPANY.social.facebook;
+  const tiktok = data?.tiktok || COMPANY.social.tiktok;
+  const instagram = data?.instagram || "";
+  const youtube = data?.youtube || "";
+  const email = data?.email || "";
 
   return (
     <section
@@ -58,17 +89,19 @@ export default function ContactSection() {
           dir={dir}
         >
           <h2 className="text-3xl font-bold sm:text-4xl lg:text-5xl">
-            <span className="text-gradient-gold">{t.contact.title}</span>
+            <span className="text-gradient-gold">
+              {data?.contactTitle || t.contact.title}
+            </span>
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-[15px] leading-relaxed text-brand-text-light sm:text-base">
-            {t.contact.subtitle}
+            {data?.contactSubtitle || t.contact.subtitle}
           </p>
         </motion.div>
 
         <div className="mb-10 grid grid-cols-1 gap-5 md:grid-cols-2">
           {branches.map((branch, i) => (
             <motion.div
-              key={branch.title}
+              key={`${branch.title}-${branch.area}-${i}`}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -108,26 +141,35 @@ export default function ContactSection() {
                 {t.contact.phoneLabel}
               </p>
               <a
-                href={COMPANY.whatsappUrl}
+                href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-1 block text-2xl font-bold text-brand-dark transition hover:text-[#C3986E]"
                 dir="ltr"
               >
-                {COMPANY.phone}
+                {phone}
               </a>
+              {email ? (
+                <a
+                  href={`mailto:${email}`}
+                  className="mt-2 block text-sm text-brand-text-light transition hover:text-[#C3986E]"
+                  dir="ltr"
+                >
+                  {email}
+                </a>
+              ) : null}
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <a
-                href={`tel:${COMPANY.phoneTel}`}
+                href={`tel:${phoneTel}`}
                 className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#C3986E] to-[#D1AC81] px-7 py-3.5 text-sm font-bold text-[#3E2E1F] shadow-md transition-all hover:scale-[1.02] hover:shadow-lg"
               >
                 <Phone className="h-4 w-4" />
                 {t.contact.callNow}
               </a>
               <a
-                href={COMPANY.whatsappUrl}
+                href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 rounded-full border border-[#25D366]/40 bg-[#25D366]/10 px-7 py-3.5 text-sm font-semibold text-[#128C7E] transition hover:scale-[1.02] hover:bg-[#25D366]/18"
@@ -138,24 +180,50 @@ export default function ContactSection() {
             </div>
 
             <div className="flex items-center justify-center gap-3 lg:justify-start">
-              <a
-                href={COMPANY.social.facebook}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Facebook"
-                className="flex h-12 w-12 items-center justify-center rounded-full border border-[#D1AC81]/35 bg-brand-surface text-[#C3986E] shadow-md transition hover:scale-105 hover:border-[#C3986E] hover:bg-[#C3986E] hover:text-[#FAFBF9]"
-              >
-                <FacebookIcon className="h-5 w-5" />
-              </a>
-              <a
-                href={COMPANY.social.tiktok}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="TikTok"
-                className="flex h-12 w-12 items-center justify-center rounded-full border border-[#D1AC81]/35 bg-brand-surface text-[#C3986E] shadow-md transition hover:scale-105 hover:border-[#C3986E] hover:bg-[#C3986E] hover:text-[#FAFBF9]"
-              >
-                <TikTokIcon className="h-5 w-5" />
-              </a>
+              {facebook ? (
+                <a
+                  href={facebook}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Facebook"
+                  className={socialBtnClass}
+                >
+                  <FacebookIcon className="h-5 w-5" />
+                </a>
+              ) : null}
+              {tiktok ? (
+                <a
+                  href={tiktok}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="TikTok"
+                  className={socialBtnClass}
+                >
+                  <TikTokIcon className="h-5 w-5" />
+                </a>
+              ) : null}
+              {instagram ? (
+                <a
+                  href={instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram"
+                  className={socialBtnClass}
+                >
+                  <InstagramIcon className="h-5 w-5" />
+                </a>
+              ) : null}
+              {youtube ? (
+                <a
+                  href={youtube}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="YouTube"
+                  className={socialBtnClass}
+                >
+                  <YoutubeIcon className="h-5 w-5" />
+                </a>
+              ) : null}
             </div>
           </div>
         </motion.div>

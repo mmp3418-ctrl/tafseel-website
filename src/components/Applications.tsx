@@ -2,21 +2,25 @@
 
 import { motion } from "framer-motion";
 import { useApp } from "@/components/providers/AppProviders";
+import { asset } from "@/lib/assets";
 import PublicMediaImg from "@/components/PublicMediaImg";
+import type { HomeSettings } from "@/lib/home-settings";
 
-export const galleryImages = [
-  { id: 1, file: "/j1.jpeg", alt: "مشروع مظلات 1" },
-  { id: 2, file: "/j2.jpeg", alt: "مشروع مظلات 2" },
-  { id: 3, file: "/j3.jpeg", alt: "مشروع مظلات 3" },
-  { id: 4, file: "/j4.jpeg", alt: "مشروع مظلات 4" },
-  { id: 5, file: "/j5.jpeg", alt: "مشروع مظلات 5" },
-  { id: 6, file: "/j6.jpeg", alt: "مشروع مظلات 6" },
-  { id: 7, file: "/j7.jpeg", alt: "مشروع مظلات 7" },
-  { id: 8, file: "/j8.jpeg", alt: "مشروع مظلات 8" },
-] as const;
-
-export default function Applications() {
+export default function Applications({
+  home,
+  homeReady = true,
+}: {
+  home?: HomeSettings | null;
+  homeReady?: boolean;
+}) {
   const { t } = useApp();
+  const images =
+    home?.gallery?.map((item, index) => ({
+      id: index + 1,
+      file: item.mediaUrl,
+      mediaType: item.mediaType,
+      alt: item.alt || `مشروع مظلات ${index + 1}`,
+    })) ?? [];
 
   return (
     <section id="applications" className="bg-gold-mesh py-12 sm:py-20 lg:py-32">
@@ -29,20 +33,40 @@ export default function Applications() {
           className="mb-8 text-center sm:mb-12"
         >
           <h2 className="text-2xl font-bold sm:text-4xl lg:text-5xl">
-            <span className="text-gradient-gold">{t.gallery.title}</span>
+            <span className="text-gradient-gold">
+              {home?.galleryTitle || t.gallery.title}
+            </span>
           </h2>
         </motion.div>
 
-        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {galleryImages.map((item, i) => (
-            <ImageCard
-              key={item.id}
-              image={item.file}
-              alt={item.alt}
-              index={i}
-            />
-          ))}
-        </div>
+        {!homeReady ? (
+          <div className="mx-auto grid max-w-7xl grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }, (_, i) => (
+              <div
+                key={i}
+                className="overflow-hidden rounded-2xl border border-[rgba(209,172,129,0.15)] bg-[#241E18] p-2 sm:rounded-3xl"
+              >
+                <div className="h-48 w-full animate-pulse rounded-xl bg-[#1A1612] sm:h-64" />
+              </div>
+            ))}
+          </div>
+        ) : images.length === 0 ? (
+          <p className="py-16 text-center text-sm text-brand-text-light sm:text-base">
+            لا توجد صور في المعرض بعد.
+          </p>
+        ) : (
+          <div className="mx-auto grid max-w-7xl grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {images.map((item, i) => (
+              <ImageCard
+                key={`${item.file}-${item.id}`}
+                image={item.file}
+                mediaType={item.mediaType}
+                alt={item.alt}
+                index={i}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
@@ -50,13 +74,23 @@ export default function Applications() {
 
 function ImageCard({
   image,
+  mediaType,
   alt,
   index,
 }: {
   image: string;
+  mediaType: string;
   alt: string;
   index: number;
 }) {
+  const isVideo =
+    mediaType === "video" || /\.(mp4|webm|ogg|mov|m4v)(?:$|[?#])/i.test(image);
+  const mediaSrc = image
+    ? /^https?:|^data:|^blob:/i.test(image)
+      ? image
+      : asset(image)
+    : "";
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
@@ -67,12 +101,26 @@ function ImageCard({
       className="overflow-hidden rounded-2xl border border-[rgba(209,172,129,0.2)] bg-[#241E18] p-2 transition-all duration-300 hover:border-[#C3986E] hover:shadow-xl sm:rounded-3xl"
     >
       <div className="overflow-hidden rounded-xl bg-[#1A1612]">
-        <PublicMediaImg
-          src={image}
-          alt={alt}
-          className="h-48 w-full object-cover transition-transform duration-500 hover:scale-105 sm:h-64"
-          loading="lazy"
-        />
+        {isVideo && mediaSrc ? (
+          <video
+            src={mediaSrc}
+            controls
+            playsInline
+            preload="metadata"
+            className="h-48 w-full object-cover sm:h-64"
+          />
+        ) : mediaSrc ? (
+          <PublicMediaImg
+            src={image}
+            alt={alt}
+            className="h-48 w-full object-cover transition-transform duration-500 hover:scale-105 sm:h-64"
+            loading="lazy"
+          />
+        ) : (
+          <div className="flex h-48 w-full items-center justify-center text-xs text-[#E2E8F0]/40 sm:h-64">
+            لا توجد وسائط
+          </div>
+        )}
       </div>
     </motion.div>
   );

@@ -22,7 +22,9 @@ type NavItem = {
 };
 
 export default function Header({ onOpenContact }: HeaderProps) {
-  const { t, locale, theme, toggleLocale, toggleTheme, dir } = useApp();
+  const { t, locale, theme, toggleLocale, toggleTheme, dir, site } = useApp();
+  const whatsappUrl = site.whatsappUrl || COMPANY.whatsappUrl;
+  const brandName = locale === "ar" ? site.companyNameAr : site.companyNameEn;
   const pathname = usePathname() ?? "/";
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -105,7 +107,7 @@ export default function Header({ onOpenContact }: HeaderProps) {
           className="group relative z-10 flex min-w-0 shrink-0 items-center"
         >
           <BrandLogo
-            alt={locale === "ar" ? COMPANY.nameAr : COMPANY.shortName}
+            alt={brandName || (locale === "ar" ? COMPANY.nameAr : COMPANY.shortName)}
           />
         </Link>
 
@@ -186,7 +188,7 @@ export default function Header({ onOpenContact }: HeaderProps) {
           </button>
 
           <a
-            href={COMPANY.whatsappUrl}
+            href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="hidden items-center gap-2 rounded-full bg-gradient-to-r from-[#C3986E] to-[#D1AC81] px-4 py-2 text-[13px] font-bold text-[#12100E] shadow-lg transition-all hover:scale-105 md:inline-flex"
@@ -251,7 +253,7 @@ export default function Header({ onOpenContact }: HeaderProps) {
                 className="mt-3 mb-1 inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#C3986E] to-[#D1AC81] px-6 py-3 font-bold text-[#12100E] shadow-lg transition-all duration-300 hover:scale-105"
               />
               <a
-                href={COMPANY.whatsappUrl}
+                href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => setMobileOpen(false)}

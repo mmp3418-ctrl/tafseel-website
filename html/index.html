@@ -151,6 +151,14 @@
           >
             معرض المشاريع
           </button>
+          <button
+            type="button"
+            data-tab="home"
+            class="tab-btn flex-1 rounded-xl px-2 py-2.5 text-xs font-bold transition sm:px-4 sm:text-sm"
+            role="tab"
+          >
+            الصفحة الرئيسية
+          </button>
         </div>
 
         <div id="banner" class="mb-5 hidden rounded-2xl border px-4 py-3 text-sm sm:mb-6" role="alert"></div>
@@ -253,6 +261,96 @@
             <div id="project-list" class="mt-4 grid gap-4 sm:grid-cols-2"></div>
           </section>
         </section>
+
+        <section id="panel-home" class="hidden">
+          <form id="home-form" class="space-y-5">
+            <section class="rounded-3xl border border-sand/15 bg-panel/70 p-5 shadow-lg backdrop-blur-sm sm:p-6">
+              <h2 class="text-base font-extrabold text-white sm:text-lg">الهيرو</h2>
+              <div class="mt-4 space-y-3">
+                <input id="home-badge" class="field" placeholder="الشارة" />
+                <input id="home-title" class="field" placeholder="العنوان" />
+                <textarea id="home-subtitle" rows="3" class="field" placeholder="الوصف"></textarea>
+                <div class="grid gap-3 sm:grid-cols-2">
+                  <input id="home-cta-whatsapp" class="field" placeholder="زر واتساب" />
+                  <input id="home-cta-projects" class="field" placeholder="زر المشاريع" />
+                </div>
+                <label class="block text-xs text-mist/70">فيديو الخلفية (اتركه فارغًا للإبقاء على الحالي)</label>
+                <input id="home-hero-video" type="file" accept="video/*" class="field" />
+                <video id="home-hero-preview" class="hidden h-40 w-full rounded-xl bg-black object-cover" controls playsinline></video>
+              </div>
+            </section>
+
+            <section class="rounded-3xl border border-sand/15 bg-panel/70 p-5 shadow-lg backdrop-blur-sm sm:p-6">
+              <h2 class="text-base font-extrabold text-white sm:text-lg">سلسلة المنتجات</h2>
+              <div class="mt-4 space-y-3">
+                <input id="home-products-title" class="field" placeholder="عنوان القسم" />
+                <textarea id="home-products-subtitle" rows="2" class="field" placeholder="وصف القسم"></textarea>
+                <input id="home-order-label" class="field" placeholder="نص زر الطلب" />
+                <div class="grid gap-4 lg:grid-cols-2">
+                  <div class="space-y-2 rounded-2xl border border-sand/15 p-3">
+                    <p class="text-sm font-bold text-sand">البطاقة الأولى</p>
+                    <input id="home-card1-title" class="field" placeholder="العنوان" />
+                    <textarea id="home-card1-desc" rows="3" class="field" placeholder="الوصف"></textarea>
+                    <input id="home-card1-media" type="file" accept="image/*,video/*" class="field" />
+                    <div id="home-card1-preview"></div>
+                  </div>
+                  <div class="space-y-2 rounded-2xl border border-sand/15 p-3">
+                    <p class="text-sm font-bold text-sand">البطاقة الثانية</p>
+                    <input id="home-card2-title" class="field" placeholder="العنوان" />
+                    <textarea id="home-card2-desc" rows="3" class="field" placeholder="الوصف"></textarea>
+                    <input id="home-card2-media" type="file" accept="image/*,video/*" class="field" />
+                    <div id="home-card2-preview"></div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="rounded-3xl border border-sand/15 bg-panel/70 p-5 shadow-lg backdrop-blur-sm sm:p-6">
+              <div class="flex items-center justify-between gap-3">
+                <h2 class="text-base font-extrabold text-white sm:text-lg">معرض الأعمال</h2>
+                <button id="home-gallery-add" type="button" class="rounded-xl bg-gold px-4 py-2 text-sm font-bold text-ink">إضافة صورة</button>
+              </div>
+              <input id="home-gallery-title" class="field mt-4" placeholder="عنوان المعرض" />
+              <div id="home-gallery-list" class="mt-4 grid gap-3 sm:grid-cols-2"></div>
+            </section>
+
+            <section class="rounded-3xl border border-sand/15 bg-panel/70 p-5 shadow-lg backdrop-blur-sm sm:p-6">
+              <h2 class="text-base font-extrabold text-white sm:text-lg">معلومات التواصل والروابط</h2>
+              <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                <input id="home-company-ar" class="field" placeholder="اسم الشركة (عربي)" />
+                <input id="home-company-en" class="field" placeholder="اسم الشركة (إنجليزي)" />
+                <textarea id="home-footer-blurb" rows="2" class="field sm:col-span-2" placeholder="نبذة التذييل"></textarea>
+                <input id="home-contact-title" class="field sm:col-span-2" placeholder="عنوان التواصل" />
+                <textarea id="home-contact-subtitle" rows="2" class="field sm:col-span-2" placeholder="وصف التواصل"></textarea>
+                <input id="home-phone" class="field" placeholder="رقم العرض" dir="ltr" />
+                <input id="home-phone-tel" class="field" placeholder="رقم الاتصال +218" dir="ltr" />
+                <input id="home-email" class="field sm:col-span-2" placeholder="البريد الإلكتروني" dir="ltr" />
+                <input id="home-whatsapp" class="field sm:col-span-2" placeholder="رابط واتساب أو الرقم" dir="ltr" />
+                <input id="home-facebook" class="field" placeholder="فيسبوك" dir="ltr" />
+                <input id="home-tiktok" class="field" placeholder="تيك توك" dir="ltr" />
+                <input id="home-instagram" class="field" placeholder="إنستغرام" dir="ltr" />
+                <input id="home-youtube" class="field" placeholder="يوتيوب" dir="ltr" />
+                <input id="home-catalog-url" class="field sm:col-span-2" placeholder="رابط الكتالوج (اختياري)" dir="ltr" />
+                <input id="home-custom-label" class="field" placeholder="عنوان رابط مخصص" />
+                <input id="home-custom-url" class="field" placeholder="رابط مخصص" dir="ltr" />
+                <input id="home-b1-title" class="field" placeholder="عنوان الفرع 1" />
+                <input id="home-b1-area" class="field" placeholder="منطقة الفرع 1" />
+                <input id="home-b1-detail" class="field sm:col-span-2" placeholder="تفاصيل الفرع 1" />
+                <input id="home-b2-title" class="field" placeholder="عنوان الفرع 2" />
+                <input id="home-b2-area" class="field" placeholder="منطقة الفرع 2" />
+                <input id="home-b2-detail" class="field sm:col-span-2" placeholder="تفاصيل الفرع 2" />
+              </div>
+            </section>
+
+            <button
+              id="home-submit"
+              type="submit"
+              class="w-full rounded-xl bg-gradient-to-l from-gold to-[#85633E] py-3 text-sm font-bold text-white"
+            >
+              حفظ الصفحة الرئيسية
+            </button>
+          </form>
+        </section>
       </main>
     </div>
 
@@ -331,6 +429,8 @@
         collection,
         addDoc,
         deleteDoc,
+        getDoc,
+        setDoc,
         doc,
         query,
         orderBy,
@@ -397,9 +497,11 @@
 
       function errorMessage(error) {
         if (error?.code === "permission-denied") {
-          return "رفضت قواعد Firestore هذه العملية. اسمح بالقراءة والكتابة لمجموعات categories و products و projects.";
+          return "رفضت قواعد Firestore هذه العملية. اسمح بالقراءة والكتابة لمجموعات categories و products و projects و home_settings.";
         }
-        return error?.message || "حدث خطأ غير متوقع";
+        if (error?.message) return error.message;
+        if (typeof error === "string") return error;
+        return "حدث خطأ غير متوقع";
       }
 
       function notify(message, kind) {
@@ -612,10 +714,185 @@
         return { mediaUrl, mediaType: mediaTypeOf(file) };
       }
 
-      function setBusy(button, busy, idleLabel) {
+      function setBusy(button, busy, idleLabel, busyLabel = "جاري الحفظ…") {
         button.disabled = busy;
-        button.textContent = busy ? "جاري الضغط…" : idleLabel;
+        button.textContent = busy ? busyLabel : idleLabel;
         button.classList.toggle("opacity-60", busy);
+      }
+
+      const HOME_DEFAULTS = {
+        companyNameAr: "شركة تفاصيل للمظلات الحديثة",
+        companyNameEn: "Tafasil",
+        footerBlurb:
+          "نبتكر الظل لنصنع الفخامة المعمارية. حلول مظلات وبرجولات بتركيب هندسي محترف في ليبيا.",
+        heroBadge: "الفخامة والابتكار المعماري للمظلات",
+        heroTitle: "نبتكر الظل.. لنصنع الفخامة المعمارية",
+        heroSubtitle:
+          "أنظمة مظلات حديثة وهياكل معمارية متطورة مصممة بأعلى معايير الأناقة والمتانة للمنازل والمنشآت الفاخرة في ليبيا.",
+        heroVideoUrl: "",
+        ctaWhatsapp: "تواصل معنا عبر واتساب",
+        ctaProjects: "استكشف مشاريعنا",
+        productsTitle: "سلسلة المنتجات",
+        productsSubtitle: "اختر من بين تشكيلتنا الفاخرة المحدثة للمظلات المعمارية",
+        orderLabel: "اطلب الآن",
+        featured: [
+          {
+            title: "سلسلة المظلات المعمارية المبتكرة",
+            description:
+              "تصاميم متطورة ومقاومة للعوامل الجوية تمنح مساحتك الخارجية مظهرًا معماريًا أنيقًا.",
+            mediaUrl: "",
+            mediaType: "image",
+          },
+          {
+            title: "سلسلة التظليل العصري والبرجولات",
+            description:
+              "حلول تظليل حديثة توفر أقصى درجات الراحة والحماية مع لمسات تصميمية فاخرة.",
+            mediaUrl: "",
+            mediaType: "image",
+          },
+        ],
+        galleryTitle: "معرض أعمالنا الحصرية",
+        gallery: [],
+        contactTitle: "تواصل معنا",
+        contactSubtitle:
+          "زر أحد فرعينا أو راسلنا مباشرة — نساعدك في القياس والمعاينة وعرض السعر.",
+        phone: "0925896472",
+        phoneTel: "+218925896472",
+        email: "",
+        whatsappUrl: "https://wa.me/218925896472",
+        facebook: "https://www.facebook.com/share/1KHFKsvUVA/?mibextid=wwXIfr",
+        tiktok: "https://www.tiktok.com/@tafseel541?_r=1&_t=ZS-99xKxD9yyou",
+        instagram: "",
+        youtube: "",
+        catalogUrl: "",
+        customLinkLabel: "",
+        customLinkUrl: "",
+        branches: [
+          { title: "الفرع الأول", area: "السراج", detail: "قرب كوبري الثلاجات" },
+          {
+            title: "الفرع الثاني",
+            area: "المدينة الرياضية",
+            detail: "المجمع الاستثماري — الدور الثاني",
+          },
+        ],
+      };
+
+      const homeMedia = {
+        heroVideoUrl: "",
+        card1: { mediaUrl: "", mediaType: "image" },
+        card2: { mediaUrl: "", mediaType: "image" },
+        gallery: [],
+      };
+
+      function val(id) {
+        return document.getElementById(id).value.trim();
+      }
+
+      function setVal(id, value) {
+        document.getElementById(id).value = value || "";
+      }
+
+      function previewBox(target, item) {
+        target.innerHTML = item?.mediaUrl ? mediaMarkup(item) : "";
+      }
+
+      function renderHomeGallery() {
+        const list = document.getElementById("home-gallery-list");
+        if (!homeMedia.gallery.length) {
+          list.innerHTML = emptyState("لا توجد صور في المعرض بعد.");
+          return;
+        }
+        list.innerHTML = homeMedia.gallery
+          .map(
+            (item, index) => `
+              <div class="rounded-2xl border border-sand/15 bg-ink p-3">
+                ${mediaMarkup(item)}
+                <input data-gallery-alt="${index}" class="field mt-2" value="${escapeHtml(item.alt || "")}" placeholder="وصف الصورة" />
+                <input data-gallery-file="${index}" type="file" accept="image/*,video/*" class="field mt-2" />
+                <button type="button" data-gallery-remove="${index}" class="mt-2 rounded-lg border border-red-400/40 px-3 py-1.5 text-xs text-red-200">حذف</button>
+              </div>`
+          )
+          .join("");
+      }
+
+      function fillHomeForm(data) {
+        const source = data && typeof data === "object" ? data : HOME_DEFAULTS;
+        const featured = Array.isArray(source.featured) && source.featured.length
+          ? source.featured
+          : HOME_DEFAULTS.featured;
+        homeMedia.heroVideoUrl = source.heroVideoUrl || "";
+        homeMedia.card1 = {
+          mediaUrl: featured[0]?.mediaUrl || "",
+          mediaType: featured[0]?.mediaType || "image",
+        };
+        homeMedia.card2 = {
+          mediaUrl: featured[1]?.mediaUrl || "",
+          mediaType: featured[1]?.mediaType || "image",
+        };
+        homeMedia.gallery = Array.isArray(source.gallery)
+          ? source.gallery
+              .filter((item) => item?.mediaUrl)
+              .map((item) => ({
+                mediaUrl: item.mediaUrl,
+                mediaType: item.mediaType === "video" ? "video" : "image",
+                alt: item.alt || "",
+              }))
+          : [];
+        setVal("home-company-ar", source.companyNameAr || HOME_DEFAULTS.companyNameAr);
+        setVal("home-company-en", source.companyNameEn || HOME_DEFAULTS.companyNameEn);
+        setVal("home-footer-blurb", source.footerBlurb || HOME_DEFAULTS.footerBlurb);
+        setVal("home-badge", source.heroBadge || HOME_DEFAULTS.heroBadge);
+        setVal("home-title", source.heroTitle || HOME_DEFAULTS.heroTitle);
+        setVal("home-subtitle", source.heroSubtitle || HOME_DEFAULTS.heroSubtitle);
+        setVal("home-cta-whatsapp", source.ctaWhatsapp || HOME_DEFAULTS.ctaWhatsapp);
+        setVal("home-cta-projects", source.ctaProjects || HOME_DEFAULTS.ctaProjects);
+        setVal("home-products-title", source.productsTitle || HOME_DEFAULTS.productsTitle);
+        setVal("home-products-subtitle", source.productsSubtitle || HOME_DEFAULTS.productsSubtitle);
+        setVal("home-order-label", source.orderLabel || HOME_DEFAULTS.orderLabel);
+        setVal("home-card1-title", featured[0]?.title || HOME_DEFAULTS.featured[0].title);
+        setVal("home-card1-desc", featured[0]?.description || HOME_DEFAULTS.featured[0].description);
+        setVal("home-card2-title", featured[1]?.title || HOME_DEFAULTS.featured[1].title);
+        setVal("home-card2-desc", featured[1]?.description || HOME_DEFAULTS.featured[1].description);
+        setVal("home-gallery-title", source.galleryTitle || HOME_DEFAULTS.galleryTitle);
+        setVal("home-contact-title", source.contactTitle || HOME_DEFAULTS.contactTitle);
+        setVal("home-contact-subtitle", source.contactSubtitle || HOME_DEFAULTS.contactSubtitle);
+        setVal("home-phone", source.phone || HOME_DEFAULTS.phone);
+        setVal("home-phone-tel", source.phoneTel || HOME_DEFAULTS.phoneTel);
+        setVal("home-email", source.email || "");
+        setVal("home-whatsapp", source.whatsappUrl || HOME_DEFAULTS.whatsappUrl);
+        setVal("home-facebook", source.facebook || HOME_DEFAULTS.facebook);
+        setVal("home-tiktok", source.tiktok || HOME_DEFAULTS.tiktok);
+        setVal("home-instagram", source.instagram || "");
+        setVal("home-youtube", source.youtube || "");
+        setVal("home-catalog-url", source.catalogUrl || "");
+        setVal("home-custom-label", source.customLinkLabel || "");
+        setVal("home-custom-url", source.customLinkUrl || "");
+        const branches =
+          Array.isArray(source.branches) && source.branches.length
+            ? source.branches
+            : HOME_DEFAULTS.branches;
+        setVal("home-b1-title", branches[0]?.title);
+        setVal("home-b1-area", branches[0]?.area);
+        setVal("home-b1-detail", branches[0]?.detail);
+        setVal("home-b2-title", branches[1]?.title);
+        setVal("home-b2-area", branches[1]?.area);
+        setVal("home-b2-detail", branches[1]?.detail);
+        const heroPreview = document.getElementById("home-hero-preview");
+        if (homeMedia.heroVideoUrl) {
+          heroPreview.src = homeMedia.heroVideoUrl;
+          heroPreview.classList.remove("hidden");
+        } else {
+          heroPreview.removeAttribute("src");
+          heroPreview.classList.add("hidden");
+        }
+        previewBox(document.getElementById("home-card1-preview"), homeMedia.card1);
+        previewBox(document.getElementById("home-card2-preview"), homeMedia.card2);
+        renderHomeGallery();
+      }
+
+      async function loadHomeForm() {
+        const snapshot = await getDoc(doc(db, "home_settings", "main"));
+        fillHomeForm(snapshot.exists() ? snapshot.data() : null);
       }
 
       function activateTab(name) {
@@ -625,6 +902,7 @@
         });
         document.getElementById("panel-catalog").classList.toggle("hidden", name !== "catalog");
         document.getElementById("panel-projects").classList.toggle("hidden", name !== "projects");
+        document.getElementById("panel-home").classList.toggle("hidden", name !== "home");
       }
 
       function openApp() {
@@ -636,6 +914,7 @@
         document.getElementById("product-list").innerHTML = emptyState("جاري التحميل…");
         document.getElementById("project-list").innerHTML = emptyState("جاري التحميل…");
         startWatchers();
+        loadHomeForm().catch((error) => notify(errorMessage(error), "error"));
       }
 
       togglePassBtn.addEventListener("click", () => {
@@ -764,6 +1043,127 @@
           notify(errorMessage(error), "error");
         } finally {
           setBusy(button, false, "حفظ المشروع");
+        }
+      });
+
+      document.getElementById("home-gallery-add").addEventListener("click", () => {
+        homeMedia.gallery.push({ mediaUrl: "", mediaType: "image", alt: "" });
+        renderHomeGallery();
+      });
+
+      document.getElementById("home-gallery-list").addEventListener("click", (event) => {
+        const button = event.target.closest("[data-gallery-remove]");
+        if (!button) return;
+        homeMedia.gallery.splice(Number(button.dataset.galleryRemove), 1);
+        renderHomeGallery();
+      });
+
+      document.getElementById("home-gallery-list").addEventListener("input", (event) => {
+        const input = event.target.closest("[data-gallery-alt]");
+        if (!input) return;
+        const item = homeMedia.gallery[Number(input.dataset.galleryAlt)];
+        if (item) item.alt = input.value;
+      });
+
+      document.getElementById("home-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const button = document.getElementById("home-submit");
+        setBusy(button, true, "حفظ الصفحة الرئيسية", "جاري الرفع والحفظ…");
+        try {
+          const heroFile = document.getElementById("home-hero-video").files[0];
+          if (heroFile) {
+            homeMedia.heroVideoUrl = await uploadToSupabase(heroFile);
+          }
+          const card1File = document.getElementById("home-card1-media").files[0];
+          if (card1File) {
+            homeMedia.card1 = {
+              mediaUrl: await uploadToSupabase(card1File),
+              mediaType: mediaTypeOf(card1File),
+            };
+          }
+          const card2File = document.getElementById("home-card2-media").files[0];
+          if (card2File) {
+            homeMedia.card2 = {
+              mediaUrl: await uploadToSupabase(card2File),
+              mediaType: mediaTypeOf(card2File),
+            };
+          }
+          const fileInputs = [...document.querySelectorAll("[data-gallery-file]")];
+          for (const input of fileInputs) {
+            const file = input.files[0];
+            const index = Number(input.dataset.galleryFile);
+            if (!file || !homeMedia.gallery[index]) continue;
+            homeMedia.gallery[index].mediaUrl = await uploadToSupabase(file);
+            homeMedia.gallery[index].mediaType = mediaTypeOf(file);
+          }
+          const gallery = homeMedia.gallery
+            .map((item, index) => {
+              const altInput = document.querySelector(`[data-gallery-alt="${index}"]`);
+              return {
+                mediaUrl: item.mediaUrl,
+                mediaType: item.mediaType === "video" ? "video" : "image",
+                alt: (altInput?.value || item.alt || "").trim(),
+              };
+            })
+            .filter((item) => item.mediaUrl);
+
+          await setDoc(doc(db, "home_settings", "main"), {
+            companyNameAr: val("home-company-ar"),
+            companyNameEn: val("home-company-en"),
+            footerBlurb: val("home-footer-blurb"),
+            heroBadge: val("home-badge"),
+            heroTitle: val("home-title"),
+            heroSubtitle: val("home-subtitle"),
+            heroVideoUrl: homeMedia.heroVideoUrl,
+            ctaWhatsapp: val("home-cta-whatsapp"),
+            ctaProjects: val("home-cta-projects"),
+            productsTitle: val("home-products-title"),
+            productsSubtitle: val("home-products-subtitle"),
+            orderLabel: val("home-order-label"),
+            featured: [
+              {
+                title: val("home-card1-title"),
+                description: val("home-card1-desc"),
+                mediaUrl: homeMedia.card1.mediaUrl,
+                mediaType: homeMedia.card1.mediaType,
+              },
+              {
+                title: val("home-card2-title"),
+                description: val("home-card2-desc"),
+                mediaUrl: homeMedia.card2.mediaUrl,
+                mediaType: homeMedia.card2.mediaType,
+              },
+            ],
+            galleryTitle: val("home-gallery-title"),
+            gallery,
+            contactTitle: val("home-contact-title"),
+            contactSubtitle: val("home-contact-subtitle"),
+            phone: val("home-phone"),
+            phoneTel: val("home-phone-tel"),
+            email: val("home-email"),
+            whatsappUrl: val("home-whatsapp"),
+            facebook: val("home-facebook"),
+            tiktok: val("home-tiktok"),
+            instagram: val("home-instagram"),
+            youtube: val("home-youtube"),
+            catalogUrl: val("home-catalog-url"),
+            customLinkLabel: val("home-custom-label"),
+            customLinkUrl: val("home-custom-url"),
+            branches: [
+              { title: val("home-b1-title"), area: val("home-b1-area"), detail: val("home-b1-detail") },
+              { title: val("home-b2-title"), area: val("home-b2-area"), detail: val("home-b2-detail") },
+            ],
+            updatedAt: serverTimestamp(),
+          });
+          document.getElementById("home-hero-video").value = "";
+          document.getElementById("home-card1-media").value = "";
+          document.getElementById("home-card2-media").value = "";
+          await loadHomeForm();
+          notify("تم حفظ إعدادات الصفحة الرئيسية.", "ok");
+        } catch (error) {
+          notify(errorMessage(error), "error");
+        } finally {
+          setBusy(button, false, "حفظ الصفحة الرئيسية");
         }
       });
 

@@ -1,7 +1,5 @@
 "use client";
 
-import { asset } from "@/lib/assets";
-
 type BrandLogoProps = {
   alt?: string;
   className?: string;
@@ -16,7 +14,8 @@ export default function BrandLogo({
   className = HEADER_IMG_CLASS,
   glow = true,
 }: BrandLogoProps) {
-  const src = asset("/lo.png");
+  // ✅ مسار مباشر للشعار من مجلد public
+  const src = "/lo.png";
 
   if (!glow) {
     return (

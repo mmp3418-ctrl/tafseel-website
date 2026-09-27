@@ -9,12 +9,14 @@ import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
 import ContactModal from "@/components/ContactModal";
 import { useIsMounted } from "@/hooks/useIsMounted";
+import { useApp } from "@/components/providers/AppProviders";
 
 /**
- * شركة تفاصيل للمظلات الحديثة — static landing page (GitHub Pages export)
+ * شركة تفاصيل للمظلات الحديثة — homepage content from Firestore `home_settings/main`
  */
 export default function HomePage() {
   const [contactOpen, setContactOpen] = useState(false);
+  const { site, siteReady } = useApp();
   const mounted = useIsMounted();
 
   return (
@@ -25,10 +27,10 @@ export default function HomePage() {
     >
       <Header onOpenContact={() => setContactOpen(true)} />
       <main>
-        <Hero onOpenContact={() => setContactOpen(true)} />
-        <ProductSeries />
-        <Applications />
-        <ContactSection />
+        <Hero home={site} homeReady={siteReady} onOpenContact={() => setContactOpen(true)} />
+        <ProductSeries home={site} homeReady={siteReady} />
+        <Applications home={site} homeReady={siteReady} />
+        <ContactSection home={site} />
       </main>
       <Footer />
       <ContactModal open={contactOpen} onClose={() => setContactOpen(false)} />
