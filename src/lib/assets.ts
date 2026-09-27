@@ -3,8 +3,7 @@
  * Always produces absolute-from-site-root URLs including basePath.
  */
 export const BASE_PATH = (
-  process.env.NEXT_PUBLIC_BASE_PATH ||
-  "/tafseel-website"
+  process.env.NEXT_PUBLIC_BASE_PATH ?? "/tafseel-website"
 ).replace(/\/$/, "");
 
 /** Force lowercase path segments + preferred image/video extensions */

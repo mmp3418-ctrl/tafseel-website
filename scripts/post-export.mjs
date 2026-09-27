@@ -10,7 +10,7 @@ import {
 import { join } from "path";
 
 const outDir = join(process.cwd(), "out");
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "/tafseel-website";
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "/tafseel-website";
 
 /** GitHub Pages ignores `_`-prefixed dirs unless this file exists */
 writeFileSync(join(outDir, ".nojekyll"), "");

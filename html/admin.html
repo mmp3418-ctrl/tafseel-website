@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>لوحة تحكم تفاصيل</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              ink: "#12100E",
+              panel: "#241E18",
+              gold: "#C3986E",
+              sand: "#D1AC81",
+              mist: "#E2E8F0",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="min-h-screen bg-ink text-mist antialiased">
+    <div id="gate" class="flex min-h-screen items-center justify-center px-4">
+      <form id="gate-form" class="w-full max-w-md rounded-3xl border border-sand/20 bg-panel p-8 shadow-2xl">
+        <p class="text-sm font-semibold text-sand">شركة تفاصيل للمظلات الحديثة</p>
+        <h1 class="mt-2 text-2xl font-bold text-white">لوحة التحكم</h1>
+        <p class="mt-2 text-sm text-mist/70">أدخل رمز الدخول للمتابعة.</p>
+        <label class="mt-6 block text-sm font-medium" for="passcode">رمز الدخول</label>
+        <input
+          id="passcode"
+          type="password"
+          inputmode="numeric"
+          maxlength="6"
+          autocomplete="off"
+          class="mt-2 w-full rounded-xl border border-sand/25 bg-ink px-4 py-3 text-center text-lg tracking-[0.4em] text-white outline-none focus:border-gold"
+          placeholder="••••••"
+        />
+        <p id="gate-error" class="mt-3 hidden text-sm text-red-300"></p>
+        <button
+          type="submit"
+          class="mt-6 w-full rounded-xl bg-gradient-to-l from-gold to-[#85633E] py-3 text-sm font-bold text-white"
+        >
+          دخول
+        </button>
+      </form>
+    </div>
+
+    <div id="app" class="hidden">
+      <header class="border-b border-sand/15 bg-panel/80">
+        <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-5">
+          <div>
+            <p class="text-xs font-semibold text-sand">تفاصيل</p>
+            <h1 class="text-xl font-bold text-white sm:text-2xl">لوحة تحكم العميل</h1>
+          </div>
+          <button id="lock-btn" type="button" class="rounded-full border border-sand/30 px-4 py-2 text-sm text-sand">
+            قفل
+          </button>
+        </div>
+      </header>
+
+      <main class="mx-auto max-w-6xl px-4 py-8">
+        <div class="mb-6 flex flex-wrap gap-2" role="tablist">
+          <button type="button" data-tab="catalog" class="tab-btn rounded-full px-4 py-2.5 text-sm font-semibold" role="tab">
+            إدارة المنتجات والتصنيفات
+          </button>
+          <button type="button" data-tab="projects" class="tab-btn rounded-full px-4 py-2.5 text-sm font-semibold" role="tab">
+            إدارة معرض المشاريع
+          </button>
+        </div>
+
+        <div id="banner" class="mb-6 hidden rounded-2xl border px-4 py-3 text-sm" role="alert"></div>
+
+        <section id="panel-catalog">
+          <div class="grid gap-6 lg:grid-cols-2">
+            <section class="rounded-3xl border border-sand/15 bg-panel p-5 sm:p-6">
+              <h2 class="text-lg font-bold text-white">إدارة التصنيفات</h2>
+              <form id="category-form" class="mt-4 flex gap-2">
+                <input
+                  id="category-name"
+                  required
+                  class="min-w-0 flex-1 rounded-xl border border-sand/25 bg-ink px-4 py-3 text-sm outline-none focus:border-gold"
+                  placeholder="اسم التصنيف"
+                />
+                <button type="submit" class="rounded-xl bg-gold px-4 py-3 text-sm font-bold text-ink">إضافة</button>
+              </form>
+              <ul id="category-list" class="mt-4 space-y-2"></ul>
+            </section>
+
+            <section class="rounded-3xl border border-sand/15 bg-panel p-5 sm:p-6">
+              <h2 class="text-lg font-bold text-white">إضافة منتج</h2>
+              <form id="product-form" class="mt-4 space-y-3">
+                <input id="product-title" required class="field" placeholder="عنوان المنتج" />
+                <select id="product-category" required class="field">
+                  <option value="">اختر التصنيف</option>
+                </select>
+                <input id="product-price" required type="number" min="0" step="0.01" class="field" placeholder="السعر" />
+                <textarea id="product-description" required rows="3" class="field" placeholder="الوصف"></textarea>
+                <input id="product-media" required type="file" accept="image/*,video/*" class="field file:ml-3 file:rounded-lg file:border-0 file:bg-gold file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-ink" />
+                <button id="product-submit" type="submit" class="w-full rounded-xl bg-gradient-to-l from-gold to-[#85633E] py-3 text-sm font-bold text-white">
+                  حفظ المنتج
+                </button>
+              </form>
+            </section>
+          </div>
+
+          <section class="mt-6 rounded-3xl border border-sand/15 bg-panel p-5 sm:p-6">
+            <h2 class="text-lg font-bold text-white">المنتجات الحالية</h2>
+            <div id="product-list" class="mt-4 grid gap-4 sm:grid-cols-2"></div>
+          </section>
+        </section>
+
+        <section id="panel-projects" class="hidden">
+          <section class="rounded-3xl border border-sand/15 bg-panel p-5 sm:p-6">
+            <h2 class="text-lg font-bold text-white">إضافة مشروع</h2>
+            <form id="project-form" class="mt-4 space-y-3">
+              <input id="project-title" required class="field" placeholder="عنوان المشروع" />
+              <textarea id="project-description" required rows="3" class="field" placeholder="الوصف"></textarea>
+              <input id="project-media" required type="file" accept="image/*,video/*" class="field file:ml-3 file:rounded-lg file:border-0 file:bg-gold file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-ink" />
+              <button id="project-submit" type="submit" class="w-full rounded-xl bg-gradient-to-l from-gold to-[#85633E] py-3 text-sm font-bold text-white">
+                حفظ المشروع
+              </button>
+            </form>
+          </section>
+
+          <section class="mt-6 rounded-3xl border border-sand/15 bg-panel p-5 sm:p-6">
+            <h2 class="text-lg font-bold text-white">المشاريع الحالية</h2>
+            <div id="project-list" class="mt-4 grid gap-4 sm:grid-cols-2"></div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <style>
+      .field {
+        width: 100%;
+        border-radius: 0.75rem;
+        border: 1px solid rgba(209, 172, 129, 0.25);
+        background: #12100e;
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+        outline: none;
+      }
+      .field:focus {
+        border-color: #c3986e;
+      }
+      .tab-btn {
+        border: 1px solid rgba(209, 172, 129, 0.25);
+        background: #241e18;
+        color: #e2e8f0;
+      }
+      .tab-btn.is-active {
+        border-color: transparent;
+        background: linear-gradient(to left, #c3986e, #d1ac81);
+        color: #12100e;
+      }
+    </style>
+
+    <script type="module">
+      import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+      import {
+        getFirestore,
+        collection,
+        addDoc,
+        deleteDoc,
+        doc,
+        query,
+        orderBy,
+        serverTimestamp,
+        onSnapshot,
+      } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyCfe92epuUQY7oHOdbwLYPDx7jgtgP6-MI",
+        authDomain: "tafasel-4840c.firebaseapp.com",
+        projectId: "tafasel-4840c",
+        storageBucket: "tafasel-4840c.firebasestorage.app",
+        messagingSenderId: "1093253713976",
+        appId: "1:1093253713976:web:c5d29fefe320f35312d6cd",
+      };
+
+      const PASSCODE = "123456";
+      const SESSION_KEY = "tafasil-admin-unlocked";
+      const CLOUDINARY_PRESET = "docs_upload_example_us_preset";
+
+      const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      const gate = document.getElementById("gate");
+      const appRoot = document.getElementById("app");
+      const gateForm = document.getElementById("gate-form");
+      const passcodeInput = document.getElementById("passcode");
+      const gateError = document.getElementById("gate-error");
+      const banner = document.getElementById("banner");
+
+      let categories = [];
+      let stopWatchers = () => {};
+      let noticeTimer = 0;
+      let lastNotice = "";
+
+      function escapeHtml(value) {
+        return String(value ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function safeUrl(url) {
+        try {
+          const parsed = new URL(String(url));
+          if (parsed.protocol === "https:" || parsed.protocol === "http:") return parsed.href;
+        } catch {
+          /* ignore invalid urls */
+        }
+        return "";
+      }
+
+      function errorMessage(error) {
+        if (error?.code === "permission-denied") {
+          return "رفضت قواعد Firestore هذه العملية. اسمح بالقراءة والكتابة لمجموعات categories و products و projects.";
+        }
+        return error?.message || "حدث خطأ غير متوقع";
+      }
+
+      function notify(message, kind) {
+        const key = `${kind}:${message}`;
+        if (key === lastNotice) return;
+        lastNotice = key;
+        banner.textContent = message;
+        banner.classList.remove("hidden", "border-red-400/40", "bg-red-950/40", "text-red-100", "border-emerald-400/40", "bg-emerald-950/40", "text-emerald-100");
+        if (kind === "error") {
+          banner.classList.add("border-red-400/40", "bg-red-950/40", "text-red-100");
+        } else {
+          banner.classList.add("border-emerald-400/40", "bg-emerald-950/40", "text-emerald-100");
+        }
+        window.clearTimeout(noticeTimer);
+        noticeTimer = window.setTimeout(() => {
+          banner.classList.add("hidden");
+          lastNotice = "";
+        }, kind === "error" ? 8000 : 4000);
+      }
+
+      function mediaMarkup(item) {
+        const src = safeUrl(item.mediaUrl);
+        if (!src) {
+          return '<div class="flex h-40 items-center justify-center rounded-xl bg-ink text-xs text-mist/50">لا توجد وسائط</div>';
+        }
+        const type = item.mediaType === "video" || /\.(mp4|webm|ogg|mov|m4v)(?:$|[?#])/i.test(src) ? "video" : "image";
+        if (type === "video") {
+          return `<video src="${escapeHtml(src)}" class="h-40 w-full rounded-xl bg-black object-cover" controls playsinline preload="metadata"></video>`;
+        }
+        return `<img src="${escapeHtml(src)}" alt="" class="h-40 w-full rounded-xl object-cover" />`;
+      }
+
+      function formatPrice(price) {
+        const number = typeof price === "number" ? price : Number(price);
+        if (!Number.isFinite(number)) return escapeHtml(price);
+        return new Intl.NumberFormat("ar-LY", { maximumFractionDigits: 2 }).format(number);
+      }
+
+      function emptyState(text) {
+        return `<p class="col-span-full py-8 text-center text-sm text-mist/60">${escapeHtml(text)}</p>`;
+      }
+
+      function rowsFromSnapshot(snapshot) {
+        return snapshot.docs
+          .map((item) => ({ id: item.id, ...item.data() }))
+          .sort((a, b) => (b.createdAt?.toMillis?.() ?? 0) - (a.createdAt?.toMillis?.() ?? 0));
+      }
+
+      function watchCollection(name, onData) {
+        let fallbackUnsub = null;
+        const deliver = (snapshot) => onData(rowsFromSnapshot(snapshot), null);
+        const fail = (error) => {
+          if (error?.code === "failed-precondition" && !fallbackUnsub) {
+            fallbackUnsub = onSnapshot(collection(db, name), deliver, (fallbackError) => {
+              onData([], fallbackError);
+              notify(errorMessage(fallbackError), "error");
+            });
+            return;
+          }
+          onData([], error);
+          notify(errorMessage(error), "error");
+        };
+        const unsub = onSnapshot(query(collection(db, name), orderBy("createdAt", "desc")), deliver, fail);
+        return () => {
+          unsub();
+          if (typeof fallbackUnsub === "function") fallbackUnsub();
+        };
+      }
+
+      function startWatchers() {
+        stopWatchers();
+        const unsubscribers = [
+          watchCollection("categories", (rows, error) => {
+            if (error) {
+              categories = [];
+              document.getElementById("category-list").innerHTML = emptyState("تعذر تحميل التصنيفات.");
+              document.getElementById("product-category").innerHTML = '<option value="">اختر التصنيف</option>';
+              return;
+            }
+            categories = rows
+              .map((item) => ({ id: item.id, name: String(item.name || "").trim() }))
+              .filter((item) => item.name);
+            renderCategories();
+          }),
+          watchCollection("products", (rows, error) => {
+            if (error) {
+              document.getElementById("product-list").innerHTML = emptyState("تعذر تحميل المنتجات.");
+              return;
+            }
+            renderProducts(rows);
+          }),
+          watchCollection("projects", (rows, error) => {
+            if (error) {
+              document.getElementById("project-list").innerHTML = emptyState("تعذر تحميل المشاريع.");
+              return;
+            }
+            renderProjects(rows);
+          }),
+        ];
+        stopWatchers = () => {
+          unsubscribers.forEach((unsub) => unsub());
+          stopWatchers = () => {};
+        };
+      }
+
+      function renderCategories() {
+        const list = document.getElementById("category-list");
+        const select = document.getElementById("product-category");
+        const current = select.value;
+
+        if (!categories.length) {
+          list.innerHTML = emptyState("لا توجد تصنيفات بعد.");
+        } else {
+          list.innerHTML = categories
+            .map(
+              (item) => `
+                <li class="flex items-center justify-between gap-3 rounded-xl border border-sand/15 bg-ink px-3 py-2">
+                  <span class="text-sm">${escapeHtml(item.name)}</span>
+                  <button type="button" data-delete="categories" data-id="${escapeHtml(item.id)}" class="rounded-lg border border-red-400/40 px-3 py-1 text-xs text-red-200">حذف</button>
+                </li>`
+            )
+            .join("");
+        }
+
+        const named = [...categories].sort((a, b) => a.name.localeCompare(b.name, "ar"));
+        const options = ['<option value="">اختر التصنيف</option>']
+          .concat(named.map((item) => `<option value="${escapeHtml(item.name)}">${escapeHtml(item.name)}</option>`))
+          .join("");
+        select.innerHTML = options;
+        if ([...select.options].some((option) => option.value === current)) select.value = current;
+      }
+
+      function renderProducts(items) {
+        const list = document.getElementById("product-list");
+        if (!items.length) {
+          list.innerHTML = emptyState("لا توجد منتجات بعد.");
+          return;
+        }
+        list.innerHTML = items
+          .map(
+            (item) => `
+              <article class="overflow-hidden rounded-2xl border border-sand/15 bg-ink p-3">
+                ${mediaMarkup(item)}
+                <div class="mt-3">
+                  <p class="text-xs text-sand">${escapeHtml(item.category || "بدون تصنيف")}</p>
+                  <h3 class="mt-1 font-bold text-white">${escapeHtml(item.title || "منتج")}</h3>
+                  <p class="mt-1 text-sm font-semibold text-gold">${formatPrice(item.price)}</p>
+                  <p class="mt-2 text-sm leading-relaxed text-mist/80">${escapeHtml(item.description || "")}</p>
+                  <button type="button" data-delete="products" data-id="${escapeHtml(item.id)}" class="mt-3 rounded-lg border border-red-400/40 px-3 py-1.5 text-xs text-red-200">حذف</button>
+                </div>
+              </article>`
+          )
+          .join("");
+      }
+
+      function renderProjects(items) {
+        const list = document.getElementById("project-list");
+        if (!items.length) {
+          list.innerHTML = emptyState("لا توجد مشاريع بعد.");
+          return;
+        }
+        list.innerHTML = items
+          .map(
+            (item) => `
+              <article class="overflow-hidden rounded-2xl border border-sand/15 bg-ink p-3">
+                ${mediaMarkup(item)}
+                <div class="mt-3">
+                  <h3 class="font-bold text-white">${escapeHtml(item.title || "مشروع")}</h3>
+                  <p class="mt-2 text-sm leading-relaxed text-mist/80">${escapeHtml(item.description || "")}</p>
+                  <button type="button" data-delete="projects" data-id="${escapeHtml(item.id)}" class="mt-3 rounded-lg border border-red-400/40 px-3 py-1.5 text-xs text-red-200">حذف</button>
+                </div>
+              </article>`
+          )
+          .join("");
+      }
+
+      function mediaTypeOf(file) {
+        if (file.type.startsWith("video/") || /\.(mp4|webm|ogg|mov|m4v|avi)$/i.test(file.name)) return "video";
+        return "image";
+      }
+
+      async function uploadToCloudinary(file) {
+        const mediaType = mediaTypeOf(file);
+        const endpoint =
+          mediaType === "video"
+            ? "https://api.cloudinary.com/v1_1/demo/video/upload"
+            : "https://api.cloudinary.com/v1_1/demo/image/upload";
+        const body = new FormData();
+        body.append("file", file);
+        body.append("upload_preset", CLOUDINARY_PRESET);
+        const response = await fetch(endpoint, { method: "POST", body });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || !data.secure_url) {
+          throw new Error(data?.error?.message || "فشل رفع الملف إلى Cloudinary");
+        }
+        return { mediaUrl: data.secure_url, mediaType };
+      }
+
+      function setBusy(button, busy, idleLabel) {
+        button.disabled = busy;
+        button.textContent = busy ? "جاري الحفظ…" : idleLabel;
+        button.classList.toggle("opacity-60", busy);
+      }
+
+      function activateTab(name) {
+        document.querySelectorAll(".tab-btn").forEach((button) => {
+          button.classList.toggle("is-active", button.dataset.tab === name);
+          button.setAttribute("aria-selected", button.dataset.tab === name ? "true" : "false");
+        });
+        document.getElementById("panel-catalog").classList.toggle("hidden", name !== "catalog");
+        document.getElementById("panel-projects").classList.toggle("hidden", name !== "projects");
+      }
+
+      function openApp() {
+        sessionStorage.setItem(SESSION_KEY, "1");
+        gate.classList.add("hidden");
+        appRoot.classList.remove("hidden");
+        activateTab("catalog");
+        document.getElementById("category-list").innerHTML = emptyState("جاري التحميل…");
+        document.getElementById("product-list").innerHTML = emptyState("جاري التحميل…");
+        document.getElementById("project-list").innerHTML = emptyState("جاري التحميل…");
+        startWatchers();
+      }
+
+      gateForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        if (passcodeInput.value.trim() !== PASSCODE) {
+          gateError.textContent = "الرمز غير صحيح";
+          gateError.classList.remove("hidden");
+          return;
+        }
+        gateError.classList.add("hidden");
+        openApp();
+      });
+
+      document.getElementById("lock-btn").addEventListener("click", () => {
+        stopWatchers();
+        sessionStorage.removeItem(SESSION_KEY);
+        appRoot.classList.add("hidden");
+        gate.classList.remove("hidden");
+        passcodeInput.value = "";
+      });
+
+      document.querySelectorAll(".tab-btn").forEach((button) => {
+        button.addEventListener("click", () => activateTab(button.dataset.tab));
+      });
+
+      document.getElementById("category-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const input = document.getElementById("category-name");
+        const button = event.submitter;
+        const name = input.value.trim();
+        if (!name) {
+          notify("اكتب اسم التصنيف.", "error");
+          return;
+        }
+        if (categories.some((item) => item.name === name)) {
+          notify("هذا التصنيف موجود بالفعل.", "error");
+          return;
+        }
+        if (button) button.disabled = true;
+        try {
+          await addDoc(collection(db, "categories"), { name, createdAt: serverTimestamp() });
+          input.value = "";
+          notify("تمت إضافة التصنيف.", "ok");
+        } catch (error) {
+          notify(errorMessage(error), "error");
+        } finally {
+          if (button) button.disabled = false;
+        }
+      });
+
+      document.getElementById("product-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const button = document.getElementById("product-submit");
+        const file = document.getElementById("product-media").files[0];
+        const title = document.getElementById("product-title").value.trim();
+        const category = document.getElementById("product-category").value;
+        const price = Number(document.getElementById("product-price").value);
+        const description = document.getElementById("product-description").value.trim();
+        if (!title || !category || !description || !Number.isFinite(price) || price < 0) {
+          notify("أكمل عنوان المنتج والتصنيف والسعر والوصف.", "error");
+          return;
+        }
+        if (!file) {
+          notify("اختر صورة أو فيديو للمنتج.", "error");
+          return;
+        }
+
+        setBusy(button, true, "حفظ المنتج");
+        try {
+          const media = await uploadToCloudinary(file);
+          await addDoc(collection(db, "products"), {
+            title,
+            category,
+            price,
+            description,
+            mediaUrl: media.mediaUrl,
+            mediaType: media.mediaType,
+            createdAt: serverTimestamp(),
+          });
+          event.target.reset();
+          notify("تم حفظ المنتج.", "ok");
+        } catch (error) {
+          notify(errorMessage(error), "error");
+        } finally {
+          setBusy(button, false, "حفظ المنتج");
+        }
+      });
+
+      document.getElementById("project-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const button = document.getElementById("project-submit");
+        const file = document.getElementById("project-media").files[0];
+        const title = document.getElementById("project-title").value.trim();
+        const description = document.getElementById("project-description").value.trim();
+        if (!title || !description) {
+          notify("أكمل عنوان المشروع والوصف.", "error");
+          return;
+        }
+        if (!file) {
+          notify("اختر صورة أو فيديو للمشروع.", "error");
+          return;
+        }
+
+        setBusy(button, true, "حفظ المشروع");
+        try {
+          const media = await uploadToCloudinary(file);
+          await addDoc(collection(db, "projects"), {
+            title,
+            description,
+            mediaUrl: media.mediaUrl,
+            mediaType: media.mediaType,
+            createdAt: serverTimestamp(),
+          });
+          event.target.reset();
+          notify("تم حفظ المشروع.", "ok");
+        } catch (error) {
+          notify(errorMessage(error), "error");
+        } finally {
+          setBusy(button, false, "حفظ المشروع");
+        }
+      });
+
+      document.getElementById("app").addEventListener("click", async (event) => {
+        const button = event.target.closest("[data-delete]");
+        if (!button || button.disabled) return;
+        const collectionName = button.dataset.delete;
+        const id = button.dataset.id;
+        if (!id || !["categories", "products", "projects"].includes(collectionName)) return;
+        const labels = { categories: "التصنيف", products: "المنتج", projects: "المشروع" };
+        if (!confirm(`حذف ${labels[collectionName]}؟`)) return;
+        button.disabled = true;
+        try {
+          await deleteDoc(doc(db, collectionName, id));
+          notify("تم الحذف.", "ok");
+        } catch (error) {
+          button.disabled = false;
+          notify(errorMessage(error), "error");
+        }
+      });
+
+      window.addEventListener("unhandledrejection", (event) => {
+        event.preventDefault();
+        notify(errorMessage(event.reason), "error");
+      });
+
+      if (sessionStorage.getItem(SESSION_KEY) === "1") openApp();
+    </script>
+  </body>
+</html>

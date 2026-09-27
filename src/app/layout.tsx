@@ -10,7 +10,7 @@ const cairo = Cairo({
   display: "swap",
 });
 
-const BASE = process.env.NEXT_PUBLIC_BASE_PATH || "/tafseel-website";
+const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "/tafseel-website";
 
 export const metadata: Metadata = {
   title: "شركة تفاصيل للمظلات الحديثة | Tafasil Modern Canopies",
