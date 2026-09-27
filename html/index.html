@@ -281,34 +281,23 @@
             </section>
 
             <section class="rounded-3xl border border-sand/15 bg-panel/70 p-5 shadow-lg backdrop-blur-sm sm:p-6">
-              <h2 class="text-base font-extrabold text-white sm:text-lg">سلسلة المنتجات</h2>
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <h2 class="text-base font-extrabold text-white sm:text-lg">سلسلة المنتجات</h2>
+                <button id="home-featured-add" type="button" class="btn-gold">إضافة بطاقة</button>
+              </div>
               <div class="mt-4 space-y-3">
                 <input id="home-products-title" class="field" placeholder="عنوان القسم" />
                 <textarea id="home-products-subtitle" rows="2" class="field" placeholder="وصف القسم"></textarea>
                 <input id="home-order-label" class="field" placeholder="نص زر الطلب" />
-                <div class="grid gap-4 lg:grid-cols-2">
-                  <div class="space-y-2 rounded-2xl border border-sand/15 p-3">
-                    <p class="text-sm font-bold text-sand">البطاقة الأولى</p>
-                    <input id="home-card1-title" class="field" placeholder="العنوان" />
-                    <textarea id="home-card1-desc" rows="3" class="field" placeholder="الوصف"></textarea>
-                    <input id="home-card1-media" type="file" accept="image/*,video/*" class="field" />
-                    <div id="home-card1-preview"></div>
-                  </div>
-                  <div class="space-y-2 rounded-2xl border border-sand/15 p-3">
-                    <p class="text-sm font-bold text-sand">البطاقة الثانية</p>
-                    <input id="home-card2-title" class="field" placeholder="العنوان" />
-                    <textarea id="home-card2-desc" rows="3" class="field" placeholder="الوصف"></textarea>
-                    <input id="home-card2-media" type="file" accept="image/*,video/*" class="field" />
-                    <div id="home-card2-preview"></div>
-                  </div>
-                </div>
+                <p class="text-xs text-mist/60">أضف بطاقات فارغة جاهزة ثم املأها لاحقًا — تظهر في الموقع فور الحفظ.</p>
+                <div id="home-featured-list" class="grid gap-4 lg:grid-cols-2"></div>
               </div>
             </section>
 
             <section class="rounded-3xl border border-sand/15 bg-panel/70 p-5 shadow-lg backdrop-blur-sm sm:p-6">
               <div class="flex items-center justify-between gap-3">
                 <h2 class="text-base font-extrabold text-white sm:text-lg">معرض الأعمال</h2>
-                <button id="home-gallery-add" type="button" class="rounded-xl bg-gold px-4 py-2 text-sm font-bold text-ink">إضافة صورة</button>
+                <button id="home-gallery-add" type="button" class="btn-gold">إضافة صورة</button>
               </div>
               <input id="home-gallery-title" class="field mt-4" placeholder="عنوان المعرض" />
               <div id="home-gallery-list" class="mt-4 grid gap-3 sm:grid-cols-2"></div>
@@ -322,14 +311,7 @@
                 <textarea id="home-footer-blurb" rows="2" class="field sm:col-span-2" placeholder="نبذة التذييل"></textarea>
                 <input id="home-contact-title" class="field sm:col-span-2" placeholder="عنوان التواصل" />
                 <textarea id="home-contact-subtitle" rows="2" class="field sm:col-span-2" placeholder="وصف التواصل"></textarea>
-                <input id="home-phone" class="field" placeholder="رقم العرض" dir="ltr" />
-                <input id="home-phone-tel" class="field" placeholder="رقم الاتصال +218" dir="ltr" />
                 <input id="home-email" class="field sm:col-span-2" placeholder="البريد الإلكتروني" dir="ltr" />
-                <input id="home-whatsapp" class="field sm:col-span-2" placeholder="رابط واتساب أو الرقم" dir="ltr" />
-                <input id="home-facebook" class="field" placeholder="فيسبوك" dir="ltr" />
-                <input id="home-tiktok" class="field" placeholder="تيك توك" dir="ltr" />
-                <input id="home-instagram" class="field" placeholder="إنستغرام" dir="ltr" />
-                <input id="home-youtube" class="field" placeholder="يوتيوب" dir="ltr" />
                 <input id="home-catalog-url" class="field sm:col-span-2" placeholder="رابط الكتالوج (اختياري)" dir="ltr" />
                 <input id="home-custom-label" class="field" placeholder="عنوان رابط مخصص" />
                 <input id="home-custom-url" class="field" placeholder="رابط مخصص" dir="ltr" />
@@ -339,6 +321,40 @@
                 <input id="home-b2-title" class="field" placeholder="عنوان الفرع 2" />
                 <input id="home-b2-area" class="field" placeholder="منطقة الفرع 2" />
                 <input id="home-b2-detail" class="field sm:col-span-2" placeholder="تفاصيل الفرع 2" />
+              </div>
+
+              <div class="mt-6 space-y-5">
+                <div class="rounded-2xl border border-sand/15 bg-ink/40 p-4">
+                  <div class="mb-3 flex items-center justify-between gap-3">
+                    <h3 class="text-sm font-bold text-sand">عناوين إضافية</h3>
+                    <button id="home-blocks-add" type="button" class="btn-soft">إضافة عنوان</button>
+                  </div>
+                  <div id="home-blocks-list" class="space-y-3"></div>
+                </div>
+
+                <div class="rounded-2xl border border-sand/15 bg-ink/40 p-4">
+                  <div class="mb-3 flex items-center justify-between gap-3">
+                    <h3 class="text-sm font-bold text-sand">أرقام الهاتف</h3>
+                    <button id="home-phones-add" type="button" class="btn-soft">إضافة رقم</button>
+                  </div>
+                  <div id="home-phones-list" class="space-y-3"></div>
+                </div>
+
+                <div class="rounded-2xl border border-sand/15 bg-ink/40 p-4">
+                  <div class="mb-3 flex items-center justify-between gap-3">
+                    <h3 class="text-sm font-bold text-sand">أرقام واتساب</h3>
+                    <button id="home-whatsapps-add" type="button" class="btn-soft">إضافة واتساب</button>
+                  </div>
+                  <div id="home-whatsapps-list" class="space-y-3"></div>
+                </div>
+
+                <div class="rounded-2xl border border-sand/15 bg-ink/40 p-4">
+                  <div class="mb-3 flex items-center justify-between gap-3">
+                    <h3 class="text-sm font-bold text-sand">حسابات التواصل</h3>
+                    <button id="home-socials-add" type="button" class="btn-soft">إضافة حساب</button>
+                  </div>
+                  <div id="home-socials-list" class="space-y-3"></div>
+                </div>
               </div>
             </section>
 
@@ -363,7 +379,7 @@
         padding: 0.75rem 1rem;
         font-size: 1rem;
         outline: none;
-        transition: border-color 0.15s, box-shadow 0.15s;
+        transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
         color: #e2e8f0;
       }
       @media (min-width: 640px) {
@@ -374,6 +390,64 @@
       .field:focus {
         border-color: #c3986e;
         box-shadow: 0 0 0 3px rgba(195, 152, 110, 0.25);
+        background: #16120f;
+      }
+      .field::placeholder {
+        color: rgba(226, 232, 240, 0.4);
+      }
+      select.field {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23D1AC81' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: left 1rem center;
+        padding-left: 2.5rem;
+      }
+      .btn-gold {
+        border-radius: 0.75rem;
+        background: #c3986e;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: #12100e;
+        transition: opacity 0.15s, transform 0.15s;
+      }
+      .btn-gold:hover {
+        opacity: 0.92;
+      }
+      .btn-soft {
+        border-radius: 0.75rem;
+        border: 1px solid rgba(209, 172, 129, 0.35);
+        background: rgba(195, 152, 110, 0.1);
+        padding: 0.4rem 0.85rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #d1ac81;
+        transition: background 0.15s, border-color 0.15s;
+      }
+      .btn-soft:hover {
+        border-color: #c3986e;
+        background: rgba(195, 152, 110, 0.18);
+        color: #c3986e;
+      }
+      .btn-danger {
+        border-radius: 0.5rem;
+        border: 1px solid rgba(248, 113, 113, 0.4);
+        background: rgba(127, 29, 29, 0.35);
+        padding: 0.35rem 0.75rem;
+        font-size: 0.75rem;
+        color: #fecaca;
+        transition: background 0.15s;
+      }
+      .btn-danger:hover {
+        background: rgba(127, 29, 29, 0.55);
+      }
+      .dyn-card {
+        border-radius: 1rem;
+        border: 1px solid rgba(209, 172, 129, 0.15);
+        background: rgba(18, 16, 14, 0.7);
+        padding: 0.85rem;
+      }
+      .dyn-card + .dyn-card {
+        margin-top: 0;
       }
       .tab-btn {
         border: 1px solid transparent;
@@ -389,14 +463,12 @@
         color: #12100e;
         box-shadow: 0 4px 14px -4px rgba(195, 152, 110, 0.5);
       }
-      /* تحسين ظهور حقول الإدخال على iOS */
       input,
       select,
       textarea {
         -webkit-appearance: none;
         appearance: none;
       }
-      /* منع تكبير الشاشة تلقائيًا على iOS */
       @media (max-width: 640px) {
         input,
         select,
@@ -404,6 +476,16 @@
         button {
           font-size: 16px;
         }
+      }
+      #home-submit {
+        box-shadow: 0 10px 30px -12px rgba(195, 152, 110, 0.55);
+        transition: opacity 0.15s, transform 0.15s;
+      }
+      #home-submit:hover {
+        opacity: 0.95;
+      }
+      #home-submit:active {
+        transform: scale(0.99);
       }
       /* شريط تمرير أنيق */
       ::-webkit-scrollbar {
@@ -735,22 +817,7 @@
         productsTitle: "سلسلة المنتجات",
         productsSubtitle: "اختر من بين تشكيلتنا الفاخرة المحدثة للمظلات المعمارية",
         orderLabel: "اطلب الآن",
-        featured: [
-          {
-            title: "سلسلة المظلات المعمارية المبتكرة",
-            description:
-              "تصاميم متطورة ومقاومة للعوامل الجوية تمنح مساحتك الخارجية مظهرًا معماريًا أنيقًا.",
-            mediaUrl: "",
-            mediaType: "image",
-          },
-          {
-            title: "سلسلة التظليل العصري والبرجولات",
-            description:
-              "حلول تظليل حديثة توفر أقصى درجات الراحة والحماية مع لمسات تصميمية فاخرة.",
-            mediaUrl: "",
-            mediaType: "image",
-          },
-        ],
+        featured: [],
         galleryTitle: "معرض أعمالنا الحصرية",
         gallery: [],
         contactTitle: "تواصل معنا",
@@ -775,14 +842,52 @@
             detail: "المجمع الاستثماري — الدور الثاني",
           },
         ],
+        contactBlocks: [],
+        phones: [],
+        whatsapps: [],
+        socials: [],
       };
+
+      const SOCIAL_ICON_OPTIONS = [
+        { id: "facebook", label: "Facebook" },
+        { id: "tiktok", label: "TikTok" },
+        { id: "instagram", label: "Instagram" },
+        { id: "youtube", label: "YouTube" },
+        { id: "whatsapp", label: "WhatsApp" },
+        { id: "x", label: "X / Twitter" },
+        { id: "linkedin", label: "LinkedIn" },
+        { id: "snapchat", label: "Snapchat" },
+        { id: "telegram", label: "Telegram" },
+      ];
 
       const homeMedia = {
         heroVideoUrl: "",
-        card1: { mediaUrl: "", mediaType: "image" },
-        card2: { mediaUrl: "", mediaType: "image" },
+        featured: [],
         gallery: [],
+        contactBlocks: [],
+        phones: [],
+        whatsapps: [],
+        socials: [],
       };
+
+      function emptyFeaturedCard() {
+        return { id: `card-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, title: "", description: "", mediaUrl: "", mediaType: "image" };
+      }
+
+      function normalizeWhatsappUrl(raw, fallback = "") {
+        const value = String(raw || "").trim();
+        if (!value) return fallback;
+        if (/^https?:\/\//i.test(value)) return value;
+        const digits = value.replace(/\D/g, "");
+        return digits ? `https://wa.me/${digits}` : fallback;
+      }
+
+      function socialIconOptions(selected) {
+        return SOCIAL_ICON_OPTIONS.map(
+          (opt) =>
+            `<option value="${opt.id}" ${opt.id === selected ? "selected" : ""}>${opt.label}</option>`
+        ).join("");
+      }
 
       function val(id) {
         return document.getElementById(id).value.trim();
@@ -794,6 +899,108 @@
 
       function previewBox(target, item) {
         target.innerHTML = item?.mediaUrl ? mediaMarkup(item) : "";
+      }
+
+      function renderFeaturedList() {
+        const list = document.getElementById("home-featured-list");
+        if (!homeMedia.featured.length) {
+          list.innerHTML = emptyState("لا توجد بطاقات بعد — اضغط «إضافة بطاقة».");
+          return;
+        }
+        list.innerHTML = homeMedia.featured
+          .map(
+            (item, index) => `
+              <div class="dyn-card space-y-2" data-featured-index="${index}">
+                <div class="flex items-center justify-between gap-2">
+                  <p class="text-sm font-bold text-sand">بطاقة ${index + 1}</p>
+                  <button type="button" data-featured-remove="${index}" class="btn-danger">حذف</button>
+                </div>
+                <input data-featured-title="${index}" class="field" value="${escapeHtml(item.title || "")}" placeholder="العنوان (اختياري)" />
+                <textarea data-featured-desc="${index}" rows="3" class="field" placeholder="الوصف (اختياري)">${escapeHtml(item.description || "")}</textarea>
+                <input data-featured-file="${index}" type="file" accept="image/*,video/*" class="field" />
+                <div data-featured-preview="${index}">${item.mediaUrl ? mediaMarkup(item) : `<div class="flex h-28 items-center justify-center rounded-xl border border-dashed border-sand/25 bg-panel/40 text-xs text-mist/50">معاينة فارغة</div>`}</div>
+              </div>`
+          )
+          .join("");
+      }
+
+      function renderBlocksList() {
+        const list = document.getElementById("home-blocks-list");
+        if (!homeMedia.contactBlocks.length) {
+          list.innerHTML = emptyState("لا توجد عناوين إضافية.");
+          return;
+        }
+        list.innerHTML = homeMedia.contactBlocks
+          .map(
+            (item, index) => `
+              <div class="dyn-card space-y-2">
+                <div class="flex items-center justify-between">
+                  <p class="text-xs font-bold text-mist/70">عنوان ${index + 1}</p>
+                  <button type="button" data-block-remove="${index}" class="btn-danger">حذف</button>
+                </div>
+                <input data-block-title="${index}" class="field" value="${escapeHtml(item.title || "")}" placeholder="العنوان" />
+                <textarea data-block-body="${index}" rows="2" class="field" placeholder="النص">${escapeHtml(item.body || "")}</textarea>
+              </div>`
+          )
+          .join("");
+      }
+
+      function renderPhonesList() {
+        const list = document.getElementById("home-phones-list");
+        if (!homeMedia.phones.length) {
+          list.innerHTML = emptyState("لا توجد أرقام هاتف.");
+          return;
+        }
+        list.innerHTML = homeMedia.phones
+          .map(
+            (item, index) => `
+              <div class="dyn-card grid gap-2 sm:grid-cols-3">
+                <input data-phone-label="${index}" class="field" value="${escapeHtml(item.label || "")}" placeholder="التسمية" />
+                <input data-phone-display="${index}" class="field" value="${escapeHtml(item.display || "")}" placeholder="رقم العرض" dir="ltr" />
+                <div class="flex gap-2">
+                  <input data-phone-tel="${index}" class="field min-w-0 flex-1" value="${escapeHtml(item.tel || "")}" placeholder="+218..." dir="ltr" />
+                  <button type="button" data-phone-remove="${index}" class="btn-danger shrink-0">حذف</button>
+                </div>
+              </div>`
+          )
+          .join("");
+      }
+
+      function renderWhatsappsList() {
+        const list = document.getElementById("home-whatsapps-list");
+        if (!homeMedia.whatsapps.length) {
+          list.innerHTML = emptyState("لا توجد أرقام واتساب.");
+          return;
+        }
+        list.innerHTML = homeMedia.whatsapps
+          .map(
+            (item, index) => `
+              <div class="dyn-card grid gap-2 sm:grid-cols-[1fr_2fr_auto]">
+                <input data-wa-label="${index}" class="field" value="${escapeHtml(item.label || "")}" placeholder="التسمية" />
+                <input data-wa-url="${index}" class="field" value="${escapeHtml(item.url || "")}" placeholder="رابط أو رقم واتساب" dir="ltr" />
+                <button type="button" data-wa-remove="${index}" class="btn-danger">حذف</button>
+              </div>`
+          )
+          .join("");
+      }
+
+      function renderSocialsList() {
+        const list = document.getElementById("home-socials-list");
+        if (!homeMedia.socials.length) {
+          list.innerHTML = emptyState("لا توجد حسابات تواصل.");
+          return;
+        }
+        list.innerHTML = homeMedia.socials
+          .map(
+            (item, index) => `
+              <div class="dyn-card grid gap-2 sm:grid-cols-[1fr_1.2fr_1.5fr_auto]">
+                <input data-social-label="${index}" class="field" value="${escapeHtml(item.label || "")}" placeholder="الاسم" />
+                <select data-social-icon="${index}" class="field">${socialIconOptions(item.icon || "facebook")}</select>
+                <input data-social-url="${index}" class="field" value="${escapeHtml(item.url || "")}" placeholder="الرابط" dir="ltr" />
+                <button type="button" data-social-remove="${index}" class="btn-danger">حذف</button>
+              </div>`
+          )
+          .join("");
       }
 
       function renderHomeGallery() {
@@ -809,26 +1016,114 @@
                 ${mediaMarkup(item)}
                 <input data-gallery-alt="${index}" class="field mt-2" value="${escapeHtml(item.alt || "")}" placeholder="وصف الصورة" />
                 <input data-gallery-file="${index}" type="file" accept="image/*,video/*" class="field mt-2" />
-                <button type="button" data-gallery-remove="${index}" class="mt-2 rounded-lg border border-red-400/40 px-3 py-1.5 text-xs text-red-200">حذف</button>
+                <button type="button" data-gallery-remove="${index}" class="btn-danger mt-2">حذف</button>
               </div>`
           )
           .join("");
       }
 
+      function syncFeaturedFromDom() {
+        homeMedia.featured.forEach((item, index) => {
+          const title = document.querySelector(`[data-featured-title="${index}"]`);
+          const desc = document.querySelector(`[data-featured-desc="${index}"]`);
+          if (title) item.title = title.value.trim();
+          if (desc) item.description = desc.value.trim();
+        });
+      }
+
+      function syncListsFromDom() {
+        homeMedia.contactBlocks.forEach((item, index) => {
+          const title = document.querySelector(`[data-block-title="${index}"]`);
+          const body = document.querySelector(`[data-block-body="${index}"]`);
+          if (title) item.title = title.value.trim();
+          if (body) item.body = body.value.trim();
+        });
+        homeMedia.phones.forEach((item, index) => {
+          const label = document.querySelector(`[data-phone-label="${index}"]`);
+          const display = document.querySelector(`[data-phone-display="${index}"]`);
+          const tel = document.querySelector(`[data-phone-tel="${index}"]`);
+          if (label) item.label = label.value.trim();
+          if (display) item.display = display.value.trim();
+          if (tel) item.tel = tel.value.trim();
+        });
+        homeMedia.whatsapps.forEach((item, index) => {
+          const label = document.querySelector(`[data-wa-label="${index}"]`);
+          const url = document.querySelector(`[data-wa-url="${index}"]`);
+          if (label) item.label = label.value.trim();
+          if (url) item.url = url.value.trim();
+        });
+        homeMedia.socials.forEach((item, index) => {
+          const label = document.querySelector(`[data-social-label="${index}"]`);
+          const icon = document.querySelector(`[data-social-icon="${index}"]`);
+          const url = document.querySelector(`[data-social-url="${index}"]`);
+          if (label) item.label = label.value.trim();
+          if (icon) item.icon = icon.value;
+          if (url) item.url = url.value.trim();
+        });
+      }
+
+      function legacyPhones(source) {
+        if (Array.isArray(source.phones) && source.phones.length) {
+          return source.phones
+            .map((item) => ({
+              label: item?.label || "",
+              display: item?.display || "",
+              tel: item?.tel || "",
+            }))
+            .filter((item) => item.display || item.tel);
+        }
+        const display = source.phone || HOME_DEFAULTS.phone;
+        const tel = source.phoneTel || HOME_DEFAULTS.phoneTel;
+        return display || tel ? [{ label: "هاتف", display, tel }] : [];
+      }
+
+      function legacyWhatsapps(source) {
+        if (Array.isArray(source.whatsapps) && source.whatsapps.length) {
+          return source.whatsapps
+            .map((item) => ({
+              label: item?.label || "واتساب",
+              url: normalizeWhatsappUrl(item?.url || "", HOME_DEFAULTS.whatsappUrl),
+            }))
+            .filter((item) => item.url);
+        }
+        const url = normalizeWhatsappUrl(source.whatsappUrl || HOME_DEFAULTS.whatsappUrl, HOME_DEFAULTS.whatsappUrl);
+        return url ? [{ label: "واتساب", url }] : [];
+      }
+
+      function legacySocials(source) {
+        if (Array.isArray(source.socials) && source.socials.length) {
+          return source.socials
+            .map((item) => ({
+              label: item?.label || "",
+              url: item?.url || "",
+              icon: SOCIAL_ICON_OPTIONS.some((o) => o.id === item?.icon) ? item.icon : "facebook",
+            }))
+            .filter((item) => item.url);
+        }
+        const items = [];
+        if (source.facebook || HOME_DEFAULTS.facebook) {
+          items.push({ label: "Facebook", url: source.facebook || HOME_DEFAULTS.facebook, icon: "facebook" });
+        }
+        if (source.tiktok || HOME_DEFAULTS.tiktok) {
+          items.push({ label: "TikTok", url: source.tiktok || HOME_DEFAULTS.tiktok, icon: "tiktok" });
+        }
+        if (source.instagram) items.push({ label: "Instagram", url: source.instagram, icon: "instagram" });
+        if (source.youtube) items.push({ label: "YouTube", url: source.youtube, icon: "youtube" });
+        return items;
+      }
+
       function fillHomeForm(data) {
         const source = data && typeof data === "object" ? data : HOME_DEFAULTS;
-        const featured = Array.isArray(source.featured) && source.featured.length
-          ? source.featured
-          : HOME_DEFAULTS.featured;
         homeMedia.heroVideoUrl = source.heroVideoUrl || "";
-        homeMedia.card1 = {
-          mediaUrl: featured[0]?.mediaUrl || "",
-          mediaType: featured[0]?.mediaType || "image",
-        };
-        homeMedia.card2 = {
-          mediaUrl: featured[1]?.mediaUrl || "",
-          mediaType: featured[1]?.mediaType || "image",
-        };
+        homeMedia.featured = Array.isArray(source.featured)
+          ? source.featured.map((item, index) => ({
+              id: item?.id || `featured-${index}`,
+              title: item?.title || "",
+              description: item?.description || "",
+              mediaUrl: item?.mediaUrl || "",
+              mediaType: item?.mediaType === "video" ? "video" : "image",
+            }))
+          : [];
         homeMedia.gallery = Array.isArray(source.gallery)
           ? source.gallery
               .filter((item) => item?.mediaUrl)
@@ -838,6 +1133,15 @@
                 alt: item.alt || "",
               }))
           : [];
+        homeMedia.contactBlocks = Array.isArray(source.contactBlocks)
+          ? source.contactBlocks
+              .map((item) => ({ title: item?.title || "", body: item?.body || "" }))
+              .filter((item) => item.title || item.body)
+          : [];
+        homeMedia.phones = legacyPhones(source);
+        homeMedia.whatsapps = legacyWhatsapps(source);
+        homeMedia.socials = legacySocials(source);
+
         setVal("home-company-ar", source.companyNameAr || HOME_DEFAULTS.companyNameAr);
         setVal("home-company-en", source.companyNameEn || HOME_DEFAULTS.companyNameEn);
         setVal("home-footer-blurb", source.footerBlurb || HOME_DEFAULTS.footerBlurb);
@@ -849,21 +1153,10 @@
         setVal("home-products-title", source.productsTitle || HOME_DEFAULTS.productsTitle);
         setVal("home-products-subtitle", source.productsSubtitle || HOME_DEFAULTS.productsSubtitle);
         setVal("home-order-label", source.orderLabel || HOME_DEFAULTS.orderLabel);
-        setVal("home-card1-title", featured[0]?.title || HOME_DEFAULTS.featured[0].title);
-        setVal("home-card1-desc", featured[0]?.description || HOME_DEFAULTS.featured[0].description);
-        setVal("home-card2-title", featured[1]?.title || HOME_DEFAULTS.featured[1].title);
-        setVal("home-card2-desc", featured[1]?.description || HOME_DEFAULTS.featured[1].description);
         setVal("home-gallery-title", source.galleryTitle || HOME_DEFAULTS.galleryTitle);
         setVal("home-contact-title", source.contactTitle || HOME_DEFAULTS.contactTitle);
         setVal("home-contact-subtitle", source.contactSubtitle || HOME_DEFAULTS.contactSubtitle);
-        setVal("home-phone", source.phone || HOME_DEFAULTS.phone);
-        setVal("home-phone-tel", source.phoneTel || HOME_DEFAULTS.phoneTel);
         setVal("home-email", source.email || "");
-        setVal("home-whatsapp", source.whatsappUrl || HOME_DEFAULTS.whatsappUrl);
-        setVal("home-facebook", source.facebook || HOME_DEFAULTS.facebook);
-        setVal("home-tiktok", source.tiktok || HOME_DEFAULTS.tiktok);
-        setVal("home-instagram", source.instagram || "");
-        setVal("home-youtube", source.youtube || "");
         setVal("home-catalog-url", source.catalogUrl || "");
         setVal("home-custom-label", source.customLinkLabel || "");
         setVal("home-custom-url", source.customLinkUrl || "");
@@ -885,8 +1178,11 @@
           heroPreview.removeAttribute("src");
           heroPreview.classList.add("hidden");
         }
-        previewBox(document.getElementById("home-card1-preview"), homeMedia.card1);
-        previewBox(document.getElementById("home-card2-preview"), homeMedia.card2);
+        renderFeaturedList();
+        renderBlocksList();
+        renderPhonesList();
+        renderWhatsappsList();
+        renderSocialsList();
         renderHomeGallery();
       }
 
@@ -1046,6 +1342,76 @@
         }
       });
 
+      document.getElementById("home-featured-add").addEventListener("click", () => {
+        syncFeaturedFromDom();
+        homeMedia.featured.push(emptyFeaturedCard());
+        renderFeaturedList();
+      });
+
+      document.getElementById("home-featured-list").addEventListener("click", (event) => {
+        const button = event.target.closest("[data-featured-remove]");
+        if (!button) return;
+        syncFeaturedFromDom();
+        homeMedia.featured.splice(Number(button.dataset.featuredRemove), 1);
+        renderFeaturedList();
+      });
+
+      document.getElementById("home-blocks-add").addEventListener("click", () => {
+        syncListsFromDom();
+        homeMedia.contactBlocks.push({ title: "", body: "" });
+        renderBlocksList();
+      });
+
+      document.getElementById("home-blocks-list").addEventListener("click", (event) => {
+        const button = event.target.closest("[data-block-remove]");
+        if (!button) return;
+        syncListsFromDom();
+        homeMedia.contactBlocks.splice(Number(button.dataset.blockRemove), 1);
+        renderBlocksList();
+      });
+
+      document.getElementById("home-phones-add").addEventListener("click", () => {
+        syncListsFromDom();
+        homeMedia.phones.push({ label: "", display: "", tel: "" });
+        renderPhonesList();
+      });
+
+      document.getElementById("home-phones-list").addEventListener("click", (event) => {
+        const button = event.target.closest("[data-phone-remove]");
+        if (!button) return;
+        syncListsFromDom();
+        homeMedia.phones.splice(Number(button.dataset.phoneRemove), 1);
+        renderPhonesList();
+      });
+
+      document.getElementById("home-whatsapps-add").addEventListener("click", () => {
+        syncListsFromDom();
+        homeMedia.whatsapps.push({ label: "واتساب", url: "" });
+        renderWhatsappsList();
+      });
+
+      document.getElementById("home-whatsapps-list").addEventListener("click", (event) => {
+        const button = event.target.closest("[data-wa-remove]");
+        if (!button) return;
+        syncListsFromDom();
+        homeMedia.whatsapps.splice(Number(button.dataset.waRemove), 1);
+        renderWhatsappsList();
+      });
+
+      document.getElementById("home-socials-add").addEventListener("click", () => {
+        syncListsFromDom();
+        homeMedia.socials.push({ label: "", url: "", icon: "facebook" });
+        renderSocialsList();
+      });
+
+      document.getElementById("home-socials-list").addEventListener("click", (event) => {
+        const button = event.target.closest("[data-social-remove]");
+        if (!button) return;
+        syncListsFromDom();
+        homeMedia.socials.splice(Number(button.dataset.socialRemove), 1);
+        renderSocialsList();
+      });
+
       document.getElementById("home-gallery-add").addEventListener("click", () => {
         homeMedia.gallery.push({ mediaUrl: "", mediaType: "image", alt: "" });
         renderHomeGallery();
@@ -1070,24 +1436,23 @@
         const button = document.getElementById("home-submit");
         setBusy(button, true, "حفظ الصفحة الرئيسية", "جاري الرفع والحفظ…");
         try {
+          syncFeaturedFromDom();
+          syncListsFromDom();
+
           const heroFile = document.getElementById("home-hero-video").files[0];
           if (heroFile) {
             homeMedia.heroVideoUrl = await uploadToSupabase(heroFile);
           }
-          const card1File = document.getElementById("home-card1-media").files[0];
-          if (card1File) {
-            homeMedia.card1 = {
-              mediaUrl: await uploadToSupabase(card1File),
-              mediaType: mediaTypeOf(card1File),
-            };
+
+          const featuredFileInputs = [...document.querySelectorAll("[data-featured-file]")];
+          for (const input of featuredFileInputs) {
+            const file = input.files[0];
+            const index = Number(input.dataset.featuredFile);
+            if (!file || !homeMedia.featured[index]) continue;
+            homeMedia.featured[index].mediaUrl = await uploadToSupabase(file);
+            homeMedia.featured[index].mediaType = mediaTypeOf(file);
           }
-          const card2File = document.getElementById("home-card2-media").files[0];
-          if (card2File) {
-            homeMedia.card2 = {
-              mediaUrl: await uploadToSupabase(card2File),
-              mediaType: mediaTypeOf(card2File),
-            };
-          }
+
           const fileInputs = [...document.querySelectorAll("[data-gallery-file]")];
           for (const input of fileInputs) {
             const file = input.files[0];
@@ -1107,6 +1472,51 @@
             })
             .filter((item) => item.mediaUrl);
 
+          const featured = homeMedia.featured.map((item, index) => ({
+            id: item.id || `featured-${index}`,
+            title: (item.title || "").trim(),
+            description: (item.description || "").trim(),
+            mediaUrl: item.mediaUrl || "",
+            mediaType: item.mediaType === "video" ? "video" : "image",
+          }));
+
+          const phones = homeMedia.phones
+            .map((item) => ({
+              label: (item.label || "").trim(),
+              display: (item.display || "").trim(),
+              tel: (item.tel || "").trim(),
+            }))
+            .filter((item) => item.display || item.tel);
+
+          const whatsapps = homeMedia.whatsapps
+            .map((item) => ({
+              label: (item.label || "").trim() || "واتساب",
+              url: normalizeWhatsappUrl(item.url || ""),
+            }))
+            .filter((item) => item.url);
+
+          const socials = homeMedia.socials
+            .map((item) => ({
+              label: (item.label || "").trim(),
+              url: (item.url || "").trim(),
+              icon: SOCIAL_ICON_OPTIONS.some((o) => o.id === item.icon) ? item.icon : "facebook",
+            }))
+            .filter((item) => item.url);
+
+          const contactBlocks = homeMedia.contactBlocks
+            .map((item) => ({
+              title: (item.title || "").trim(),
+              body: (item.body || "").trim(),
+            }))
+            .filter((item) => item.title || item.body);
+
+          const primaryPhone = phones[0];
+          const primaryWhatsapp = whatsapps[0];
+          const facebook = socials.find((s) => s.icon === "facebook")?.url || "";
+          const tiktok = socials.find((s) => s.icon === "tiktok")?.url || "";
+          const instagram = socials.find((s) => s.icon === "instagram")?.url || "";
+          const youtube = socials.find((s) => s.icon === "youtube")?.url || "";
+
           await setDoc(doc(db, "home_settings", "main"), {
             companyNameAr: val("home-company-ar"),
             companyNameEn: val("home-company-en"),
@@ -1120,32 +1530,19 @@
             productsTitle: val("home-products-title"),
             productsSubtitle: val("home-products-subtitle"),
             orderLabel: val("home-order-label"),
-            featured: [
-              {
-                title: val("home-card1-title"),
-                description: val("home-card1-desc"),
-                mediaUrl: homeMedia.card1.mediaUrl,
-                mediaType: homeMedia.card1.mediaType,
-              },
-              {
-                title: val("home-card2-title"),
-                description: val("home-card2-desc"),
-                mediaUrl: homeMedia.card2.mediaUrl,
-                mediaType: homeMedia.card2.mediaType,
-              },
-            ],
+            featured,
             galleryTitle: val("home-gallery-title"),
             gallery,
             contactTitle: val("home-contact-title"),
             contactSubtitle: val("home-contact-subtitle"),
-            phone: val("home-phone"),
-            phoneTel: val("home-phone-tel"),
+            phone: primaryPhone?.display || "",
+            phoneTel: primaryPhone?.tel || "",
             email: val("home-email"),
-            whatsappUrl: val("home-whatsapp"),
-            facebook: val("home-facebook"),
-            tiktok: val("home-tiktok"),
-            instagram: val("home-instagram"),
-            youtube: val("home-youtube"),
+            whatsappUrl: primaryWhatsapp?.url || "",
+            facebook,
+            tiktok,
+            instagram,
+            youtube,
             catalogUrl: val("home-catalog-url"),
             customLinkLabel: val("home-custom-label"),
             customLinkUrl: val("home-custom-url"),
@@ -1153,11 +1550,13 @@
               { title: val("home-b1-title"), area: val("home-b1-area"), detail: val("home-b1-detail") },
               { title: val("home-b2-title"), area: val("home-b2-area"), detail: val("home-b2-detail") },
             ],
+            contactBlocks,
+            phones,
+            whatsapps,
+            socials,
             updatedAt: serverTimestamp(),
           });
           document.getElementById("home-hero-video").value = "";
-          document.getElementById("home-card1-media").value = "";
-          document.getElementById("home-card2-media").value = "";
           await loadHomeForm();
           notify("تم حفظ إعدادات الصفحة الرئيسية.", "ok");
         } catch (error) {

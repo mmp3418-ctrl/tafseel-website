@@ -8,6 +8,7 @@ export type HomeMedia = {
 };
 
 export type HomeFeatured = {
+  id?: string;
   title: string;
   description: string;
   mediaUrl: string;
@@ -19,6 +20,51 @@ export type HomeBranch = {
   area: string;
   detail: string;
 };
+
+export type ContactBlock = {
+  title: string;
+  body: string;
+};
+
+export type ContactPhone = {
+  label: string;
+  display: string;
+  tel: string;
+};
+
+export type ContactWhatsapp = {
+  label: string;
+  url: string;
+};
+
+export type SocialIconId =
+  | "facebook"
+  | "tiktok"
+  | "instagram"
+  | "youtube"
+  | "whatsapp"
+  | "x"
+  | "linkedin"
+  | "snapchat"
+  | "telegram";
+
+export type ContactSocial = {
+  label: string;
+  url: string;
+  icon: SocialIconId;
+};
+
+export const SOCIAL_ICON_OPTIONS: { id: SocialIconId; label: string }[] = [
+  { id: "facebook", label: "Facebook" },
+  { id: "tiktok", label: "TikTok" },
+  { id: "instagram", label: "Instagram" },
+  { id: "youtube", label: "YouTube" },
+  { id: "whatsapp", label: "WhatsApp" },
+  { id: "x", label: "X / Twitter" },
+  { id: "linkedin", label: "LinkedIn" },
+  { id: "snapchat", label: "Snapchat" },
+  { id: "telegram", label: "Telegram" },
+];
 
 export type HomeSettings = {
   companyNameAr: string;
@@ -38,18 +84,29 @@ export type HomeSettings = {
   gallery: HomeMedia[];
   contactTitle: string;
   contactSubtitle: string;
+  /** @deprecated prefer phones[] */
   phone: string;
+  /** @deprecated prefer phones[] */
   phoneTel: string;
   email: string;
+  /** @deprecated prefer whatsapps[] */
   whatsappUrl: string;
+  /** @deprecated prefer socials[] */
   facebook: string;
+  /** @deprecated prefer socials[] */
   tiktok: string;
+  /** @deprecated prefer socials[] */
   instagram: string;
+  /** @deprecated prefer socials[] */
   youtube: string;
   catalogUrl: string;
   customLinkLabel: string;
   customLinkUrl: string;
   branches: HomeBranch[];
+  contactBlocks: ContactBlock[];
+  phones: ContactPhone[];
+  whatsapps: ContactWhatsapp[];
+  socials: ContactSocial[];
 };
 
 export const HOME_SETTINGS_DOC = "main";
@@ -70,15 +127,19 @@ function mediaType(value: unknown, url: string): "image" | "video" {
   return "image";
 }
 
-function asFeatured(value: unknown, fallback: HomeFeatured): HomeFeatured {
-  const row = value && typeof value === "object" ? (value as Record<string, unknown>) : {};
-  const mediaUrl = text(row.mediaUrl, "");
-  return {
-    title: text(row.title, fallback.title),
-    description: text(row.description, fallback.description),
-    mediaUrl,
-    mediaType: mediaType(row.mediaType, mediaUrl),
-  };
+function asFeaturedList(value: unknown): HomeFeatured[] {
+  if (!Array.isArray(value)) return [];
+  return value.map((item, index) => {
+    const row = item && typeof item === "object" ? (item as Record<string, unknown>) : {};
+    const mediaUrl = optionalText(row.mediaUrl);
+    return {
+      id: optionalText(row.id) || `featured-${index}`,
+      title: optionalText(row.title),
+      description: optionalText(row.description),
+      mediaUrl,
+      mediaType: mediaType(row.mediaType, mediaUrl),
+    };
+  });
 }
 
 function asGallery(value: unknown): HomeMedia[] {
@@ -113,7 +174,66 @@ function asBranches(value: unknown, fallback: HomeBranch[]): HomeBranch[] {
   return rows.length ? rows : fallback;
 }
 
-export function normalizeWhatsappUrl(raw: string, fallback: string): string {
+function asContactBlocks(value: unknown): ContactBlock[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item) => {
+      const row = item && typeof item === "object" ? (item as Record<string, unknown>) : {};
+      return {
+        title: optionalText(row.title),
+        body: optionalText(row.body),
+      };
+    })
+    .filter((item) => item.title || item.body);
+}
+
+function asPhones(value: unknown): ContactPhone[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item) => {
+      const row = item && typeof item === "object" ? (item as Record<string, unknown>) : {};
+      return {
+        label: optionalText(row.label),
+        display: optionalText(row.display),
+        tel: optionalText(row.tel),
+      };
+    })
+    .filter((item) => item.display || item.tel);
+}
+
+function asWhatsapps(value: unknown): ContactWhatsapp[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item) => {
+      const row = item && typeof item === "object" ? (item as Record<string, unknown>) : {};
+      return {
+        label: optionalText(row.label),
+        url: optionalText(row.url),
+      };
+    })
+    .filter((item) => item.url);
+}
+
+function asSocialIcon(value: unknown): SocialIconId {
+  const id = optionalText(value) as SocialIconId;
+  return SOCIAL_ICON_OPTIONS.some((option) => option.id === id) ? id : "facebook";
+}
+
+function asSocials(value: unknown): ContactSocial[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item) => {
+      const row = item && typeof item === "object" ? (item as Record<string, unknown>) : {};
+      return {
+        label: optionalText(row.label),
+        url: optionalText(row.url),
+        icon: asSocialIcon(row.icon),
+      };
+    })
+    .filter((item) => item.url);
+}
+
+export function normalizeWhatsappUrl(raw: string, fallback = ""): string {
   const value = raw.trim();
   if (!value) return fallback;
   if (/^https?:\/\//i.test(value)) return value;
@@ -121,7 +241,7 @@ export function normalizeWhatsappUrl(raw: string, fallback: string): string {
   return digits ? `https://wa.me/${digits}` : fallback;
 }
 
-/** Text/contact defaults — media and optional links come from the admin panel. */
+/** Defaults — featured/contact lists start empty for admin-managed content. */
 export const DEFAULT_HOME_SETTINGS: HomeSettings = {
   companyNameAr: "شركة تفاصيل للمظلات الحديثة",
   companyNameEn: "Tafasil",
@@ -137,22 +257,7 @@ export const DEFAULT_HOME_SETTINGS: HomeSettings = {
   productsTitle: "سلسلة المنتجات",
   productsSubtitle: "اختر من بين تشكيلتنا الفاخرة المحدثة للمظلات المعمارية",
   orderLabel: "اطلب الآن",
-  featured: [
-    {
-      title: "سلسلة المظلات المعمارية المبتكرة",
-      description:
-        "تصاميم متطورة ومقاومة للعوامل الجوية تمنح مساحتك الخارجية مظهرًا معماريًا أنيقًا.",
-      mediaUrl: "",
-      mediaType: "image",
-    },
-    {
-      title: "سلسلة التظليل العصري والبرجولات",
-      description:
-        "حلول تظليل حديثة توفر أقصى درجات الراحة والحماية مع لمسات تصميمية فاخرة.",
-      mediaUrl: "",
-      mediaType: "image",
-    },
-  ],
+  featured: [],
   galleryTitle: "معرض أعمالنا الحصرية",
   gallery: [],
   contactTitle: "تواصل معنا",
@@ -177,16 +282,55 @@ export const DEFAULT_HOME_SETTINGS: HomeSettings = {
       detail: "المجمع الاستثماري — الدور الثاني",
     },
   ],
+  contactBlocks: [],
+  phones: [],
+  whatsapps: [],
+  socials: [],
 };
+
+function legacyPhones(data: Record<string, unknown>, base: HomeSettings): ContactPhone[] {
+  const list = asPhones(data.phones);
+  if (list.length) return list;
+  const display = text(data.phone, base.phone);
+  const tel = text(data.phoneTel, base.phoneTel);
+  return display || tel ? [{ label: "هاتف", display, tel }] : [];
+}
+
+function legacyWhatsapps(data: Record<string, unknown>, base: HomeSettings): ContactWhatsapp[] {
+  const list = asWhatsapps(data.whatsapps);
+  if (list.length) {
+    return list.map((item) => ({
+      ...item,
+      url: normalizeWhatsappUrl(item.url, base.whatsappUrl),
+    }));
+  }
+  const url = normalizeWhatsappUrl(text(data.whatsappUrl, base.whatsappUrl), base.whatsappUrl);
+  return url ? [{ label: "واتساب", url }] : [];
+}
+
+function legacySocials(data: Record<string, unknown>, base: HomeSettings): ContactSocial[] {
+  const list = asSocials(data.socials);
+  if (list.length) return list;
+  const items: ContactSocial[] = [];
+  const facebook = text(data.facebook, base.facebook);
+  const tiktok = text(data.tiktok, base.tiktok);
+  const instagram = optionalText(data.instagram) || base.instagram;
+  const youtube = optionalText(data.youtube) || base.youtube;
+  if (facebook) items.push({ label: "Facebook", url: facebook, icon: "facebook" });
+  if (tiktok) items.push({ label: "TikTok", url: tiktok, icon: "tiktok" });
+  if (instagram) items.push({ label: "Instagram", url: instagram, icon: "instagram" });
+  if (youtube) items.push({ label: "YouTube", url: youtube, icon: "youtube" });
+  return items;
+}
 
 export function mergeHomeSettings(raw: Record<string, unknown> | undefined): HomeSettings {
   const base = DEFAULT_HOME_SETTINGS;
   const data = raw ?? {};
-  const featuredRaw = Array.isArray(data.featured) ? data.featured : [];
-  const whatsappUrl = normalizeWhatsappUrl(
-    text(data.whatsappUrl, base.whatsappUrl),
-    base.whatsappUrl
-  );
+  const phones = legacyPhones(data, base);
+  const whatsapps = legacyWhatsapps(data, base);
+  const socials = legacySocials(data, base);
+  const primaryPhone = phones[0];
+  const primaryWhatsapp = whatsapps[0];
   return {
     companyNameAr: text(data.companyNameAr, base.companyNameAr),
     companyNameEn: text(data.companyNameEn, base.companyNameEn),
@@ -200,27 +344,30 @@ export function mergeHomeSettings(raw: Record<string, unknown> | undefined): Hom
     productsTitle: text(data.productsTitle, base.productsTitle),
     productsSubtitle: text(data.productsSubtitle, base.productsSubtitle),
     orderLabel: text(data.orderLabel, base.orderLabel),
-    featured: [0, 1].map((index) => asFeatured(featuredRaw[index], base.featured[index])),
+    featured: asFeaturedList(data.featured),
     galleryTitle: text(data.galleryTitle, base.galleryTitle),
     gallery: asGallery(data.gallery),
     contactTitle: text(data.contactTitle, base.contactTitle),
     contactSubtitle: text(data.contactSubtitle, base.contactSubtitle),
-    phone: text(data.phone, base.phone),
-    phoneTel: text(data.phoneTel, base.phoneTel),
+    phone: primaryPhone?.display || text(data.phone, base.phone),
+    phoneTel: primaryPhone?.tel || text(data.phoneTel, base.phoneTel),
     email: optionalText(data.email),
-    whatsappUrl,
-    facebook: text(data.facebook, base.facebook),
-    tiktok: text(data.tiktok, base.tiktok),
-    instagram: optionalText(data.instagram),
-    youtube: optionalText(data.youtube),
+    whatsappUrl: primaryWhatsapp?.url || normalizeWhatsappUrl(text(data.whatsappUrl, base.whatsappUrl), base.whatsappUrl),
+    facebook: socials.find((item) => item.icon === "facebook")?.url || text(data.facebook, base.facebook),
+    tiktok: socials.find((item) => item.icon === "tiktok")?.url || text(data.tiktok, base.tiktok),
+    instagram: socials.find((item) => item.icon === "instagram")?.url || optionalText(data.instagram),
+    youtube: socials.find((item) => item.icon === "youtube")?.url || optionalText(data.youtube),
     catalogUrl: optionalText(data.catalogUrl),
     customLinkLabel: optionalText(data.customLinkLabel),
     customLinkUrl: optionalText(data.customLinkUrl),
     branches: asBranches(data.branches, base.branches),
+    contactBlocks: asContactBlocks(data.contactBlocks),
+    phones,
+    whatsapps,
+    socials,
   };
 }
 
-/** Loads site/home settings from Firestore; falls back to defaults when missing. */
 export async function loadHomeSettings(): Promise<HomeSettings> {
   try {
     const snapshot = await getDoc(doc(db, "home_settings", HOME_SETTINGS_DOC));

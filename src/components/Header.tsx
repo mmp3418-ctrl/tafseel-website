@@ -23,7 +23,8 @@ type NavItem = {
 
 export default function Header({ onOpenContact }: HeaderProps) {
   const { t, locale, theme, toggleLocale, toggleTheme, dir, site } = useApp();
-  const whatsappUrl = site.whatsappUrl || COMPANY.whatsappUrl;
+  const whatsappUrl =
+    site.whatsapps?.[0]?.url || site.whatsappUrl || COMPANY.whatsappUrl;
   const brandName = locale === "ar" ? site.companyNameAr : site.companyNameEn;
   const pathname = usePathname() ?? "/";
   const [scrolled, setScrolled] = useState(false);

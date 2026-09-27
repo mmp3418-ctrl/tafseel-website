@@ -4,40 +4,8 @@ import { motion } from "framer-motion";
 import { MapPin, MessageCircle, Phone } from "lucide-react";
 import { COMPANY } from "@/lib/products";
 import { useApp } from "@/components/providers/AppProviders";
+import SocialIcon from "@/components/SocialIcon";
 import type { HomeSettings } from "@/lib/home-settings";
-import type { SVGProps } from "react";
-
-function FacebookIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
-      <path d="M14 8h3V5h-3c-2.2 0-4 1.8-4 4v2H8v3h2v7h3v-7h2.5l.5-3H13V9c0-.6.4-1 1-1z" />
-    </svg>
-  );
-}
-
-function TikTokIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
-      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.05v13.5a2.89 2.89 0 1 1-2.03-2.76v-3.1a6 6 0 1 0 5.08 5.93V9.4a8.16 8.16 0 0 0 3.77.94V6.69z" />
-    </svg>
-  );
-}
-
-function InstagramIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
-      <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm5 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm6.5-.9a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2zM12 9a3 3 0 1 1 0 6 3 3 0 0 1 0-6z" />
-    </svg>
-  );
-}
-
-function YoutubeIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
-      <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31.5 31.5 0 0 0 0 12a31.5 31.5 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31.5 31.5 0 0 0 24 12a31.5 31.5 0 0 0-.5-5.8zM9.8 15.5v-7l6.2 3.5-6.2 3.5z" />
-    </svg>
-  );
-}
 
 const socialBtnClass =
   "flex h-12 w-12 items-center justify-center rounded-full border border-[#D1AC81]/35 bg-brand-surface text-[#C3986E] shadow-md transition hover:scale-105 hover:border-[#C3986E] hover:bg-[#C3986E] hover:text-[#FAFBF9]";
@@ -60,14 +28,57 @@ export default function ContactSection({ home }: { home?: HomeSettings | null })
           detail: t.contact.branch2Detail,
         },
       ];
-  const phone = data?.phone || COMPANY.phone;
-  const phoneTel = data?.phoneTel || COMPANY.phoneTel;
-  const whatsappUrl = data?.whatsappUrl || COMPANY.whatsappUrl;
-  const facebook = data?.facebook || COMPANY.social.facebook;
-  const tiktok = data?.tiktok || COMPANY.social.tiktok;
-  const instagram = data?.instagram || "";
-  const youtube = data?.youtube || "";
+
+  const phones =
+    data?.phones?.length > 0
+      ? data.phones
+      : data?.phone
+        ? [
+            {
+              label: t.contact.phoneLabel,
+              display: data.phone,
+              tel: data.phoneTel || COMPANY.phoneTel,
+            },
+          ]
+        : [
+            {
+              label: t.contact.phoneLabel,
+              display: COMPANY.phone,
+              tel: COMPANY.phoneTel,
+            },
+          ];
+
+  const whatsapps =
+    data?.whatsapps?.length > 0
+      ? data.whatsapps
+      : [
+          {
+            label: t.contact.whatsappDirect,
+            url: data?.whatsappUrl || COMPANY.whatsappUrl,
+          },
+        ];
+
+  const socials =
+    data?.socials?.length > 0
+      ? data.socials
+      : [
+          data?.facebook
+            ? { label: "Facebook", url: data.facebook, icon: "facebook" as const }
+            : null,
+          data?.tiktok
+            ? { label: "TikTok", url: data.tiktok, icon: "tiktok" as const }
+            : null,
+          data?.instagram
+            ? { label: "Instagram", url: data.instagram, icon: "instagram" as const }
+            : null,
+          data?.youtube
+            ? { label: "YouTube", url: data.youtube, icon: "youtube" as const }
+            : null,
+        ].filter(Boolean) as { label: string; url: string; icon: "facebook" | "tiktok" | "instagram" | "youtube" }[];
+
+  const contactBlocks = data?.contactBlocks ?? [];
   const email = data?.email || "";
+  const primaryWhatsapp = whatsapps[0]?.url || COMPANY.whatsappUrl;
 
   return (
     <section
@@ -97,6 +108,31 @@ export default function ContactSection({ home }: { home?: HomeSettings | null })
             {data?.contactSubtitle || t.contact.subtitle}
           </p>
         </motion.div>
+
+        {contactBlocks.length > 0 ? (
+          <div className="mb-10 grid grid-cols-1 gap-5 md:grid-cols-2">
+            {contactBlocks.map((block, i) => (
+              <motion.div
+                key={`block-${i}-${block.title}`}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.08, duration: 0.45 }}
+                className="rounded-3xl border border-[#D1AC81]/25 bg-brand-surface/70 p-7 backdrop-blur-sm"
+                dir={dir}
+              >
+                {block.title ? (
+                  <h3 className="text-lg font-bold text-brand-dark sm:text-xl">{block.title}</h3>
+                ) : null}
+                {block.body ? (
+                  <p className="mt-2 text-sm leading-relaxed text-brand-text-light whitespace-pre-line">
+                    {block.body}
+                  </p>
+                ) : null}
+              </motion.div>
+            ))}
+          </div>
+        ) : null}
 
         <div className="mb-10 grid grid-cols-1 gap-5 md:grid-cols-2">
           {branches.map((branch, i) => (
@@ -133,26 +169,28 @@ export default function ContactSection({ home }: { home?: HomeSettings | null })
           className="glass-panel rounded-3xl border border-[#D1AC81]/30 p-6 shadow-xl sm:p-8"
         >
           <div
-            className="flex flex-col items-stretch justify-between gap-6 lg:flex-row lg:items-center"
+            className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between"
             dir={dir}
           >
-            <div>
-              <p className="text-sm text-brand-text-light">
-                {t.contact.phoneLabel}
-              </p>
-              <a
-                href={whatsappUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-1 block text-2xl font-bold text-brand-dark transition hover:text-[#C3986E]"
-                dir="ltr"
-              >
-                {phone}
-              </a>
+            <div className="min-w-0 flex-1 space-y-4">
+              {phones.map((phone, i) => (
+                <div key={`phone-${i}-${phone.display}`}>
+                  <p className="text-sm text-brand-text-light">
+                    {phone.label || t.contact.phoneLabel}
+                  </p>
+                  <a
+                    href={phone.tel ? `tel:${phone.tel}` : primaryWhatsapp}
+                    className="mt-1 block text-xl font-bold text-brand-dark transition hover:text-[#C3986E] sm:text-2xl"
+                    dir="ltr"
+                  >
+                    {phone.display || phone.tel}
+                  </a>
+                </div>
+              ))}
               {email ? (
                 <a
                   href={`mailto:${email}`}
-                  className="mt-2 block text-sm text-brand-text-light transition hover:text-[#C3986E]"
+                  className="block text-sm text-brand-text-light transition hover:text-[#C3986E]"
                   dir="ltr"
                 >
                   {email}
@@ -161,70 +199,48 @@ export default function ContactSection({ home }: { home?: HomeSettings | null })
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              <a
-                href={`tel:${phoneTel}`}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#C3986E] to-[#D1AC81] px-7 py-3.5 text-sm font-bold text-[#3E2E1F] shadow-md transition-all hover:scale-[1.02] hover:shadow-lg"
-              >
-                <Phone className="h-4 w-4" />
-                {t.contact.callNow}
-              </a>
-              <a
-                href={whatsappUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-[#25D366]/40 bg-[#25D366]/10 px-7 py-3.5 text-sm font-semibold text-[#128C7E] transition hover:scale-[1.02] hover:bg-[#25D366]/18"
-              >
-                <MessageCircle className="h-4 w-4" />
-                {t.contact.whatsappDirect}
-              </a>
+              {phones.map((phone, i) =>
+                phone.tel ? (
+                  <a
+                    key={`call-${i}`}
+                    href={`tel:${phone.tel}`}
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#C3986E] to-[#D1AC81] px-7 py-3.5 text-sm font-bold text-[#3E2E1F] shadow-md transition-all hover:scale-[1.02] hover:shadow-lg"
+                  >
+                    <Phone className="h-4 w-4" />
+                    {phone.label || t.contact.callNow}
+                  </a>
+                ) : null
+              )}
+              {whatsapps.map((wa, i) => (
+                <a
+                  key={`wa-${i}`}
+                  href={wa.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-[#25D366]/40 bg-[#25D366]/10 px-7 py-3.5 text-sm font-semibold text-[#128C7E] transition hover:scale-[1.02] hover:bg-[#25D366]/18"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  {wa.label || t.contact.whatsappDirect}
+                </a>
+              ))}
             </div>
 
-            <div className="flex items-center justify-center gap-3 lg:justify-start">
-              {facebook ? (
-                <a
-                  href={facebook}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Facebook"
-                  className={socialBtnClass}
-                >
-                  <FacebookIcon className="h-5 w-5" />
-                </a>
-              ) : null}
-              {tiktok ? (
-                <a
-                  href={tiktok}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="TikTok"
-                  className={socialBtnClass}
-                >
-                  <TikTokIcon className="h-5 w-5" />
-                </a>
-              ) : null}
-              {instagram ? (
-                <a
-                  href={instagram}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Instagram"
-                  className={socialBtnClass}
-                >
-                  <InstagramIcon className="h-5 w-5" />
-                </a>
-              ) : null}
-              {youtube ? (
-                <a
-                  href={youtube}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="YouTube"
-                  className={socialBtnClass}
-                >
-                  <YoutubeIcon className="h-5 w-5" />
-                </a>
-              ) : null}
-            </div>
+            {socials.length > 0 ? (
+              <div className="flex flex-wrap items-center justify-center gap-3 lg:justify-start">
+                {socials.map((social, i) => (
+                  <a
+                    key={`social-${i}-${social.url}`}
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={social.label || social.icon}
+                    className={socialBtnClass}
+                  >
+                    <SocialIcon icon={social.icon} className="h-5 w-5" />
+                  </a>
+                ))}
+              </div>
+            ) : null}
           </div>
         </motion.div>
       </div>

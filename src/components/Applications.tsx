@@ -51,9 +51,12 @@ export default function Applications({
             ))}
           </div>
         ) : images.length === 0 ? (
-          <p className="py-16 text-center text-sm text-brand-text-light sm:text-base">
-            لا توجد صور في المعرض بعد.
-          </p>
+          <div className="mx-auto flex max-w-md flex-col items-center gap-3 rounded-3xl border border-dashed border-[#D1AC81]/30 bg-[#241E18]/50 px-6 py-16 text-center">
+            <div className="h-14 w-14 rounded-2xl border border-dashed border-[#D1AC81]/25 bg-[#1A1612]" />
+            <p className="text-sm text-brand-text-light sm:text-base">
+              لا توجد صور في المعرض بعد.
+            </p>
+          </div>
         ) : (
           <div className="mx-auto grid max-w-7xl grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
             {images.map((item, i) => (

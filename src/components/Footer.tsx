@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type SVGProps } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowUp } from "lucide-react";
@@ -9,38 +9,7 @@ import { branchLocationLine } from "@/lib/home-settings";
 import { useApp } from "@/components/providers/AppProviders";
 import BrandLogo from "@/components/BrandLogo";
 import CatalogDownloadLink from "@/components/CatalogDownloadLink";
-
-function FacebookIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
-      <path d="M14 8h3V5h-3c-2.2 0-4 1.8-4 4v2H8v3h2v7h3v-7h2.5l.5-3H13V9c0-.6.4-1 1-1z" />
-    </svg>
-  );
-}
-
-function TikTokIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
-      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.05v13.5a2.89 2.89 0 1 1-2.03-2.76v-3.1a6 6 0 1 0 5.08 5.93V9.4a8.16 8.16 0 0 0 3.77.94V6.69z" />
-    </svg>
-  );
-}
-
-function InstagramIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
-      <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm5 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm6.5-.9a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2zM12 9a3 3 0 1 1 0 6 3 3 0 0 1 0-6z" />
-    </svg>
-  );
-}
-
-function YoutubeIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
-      <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31.5 31.5 0 0 0 0 12a31.5 31.5 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31.5 31.5 0 0 0 24 12a31.5 31.5 0 0 0-.5-5.8zM9.8 15.5v-7l6.2 3.5-6.2 3.5z" />
-    </svg>
-  );
-}
+import SocialIcon from "@/components/SocialIcon";
 
 const socialBtnClass =
   "flex h-10 w-10 items-center justify-center rounded-full border border-[#C3986E]/40 bg-[#C3986E]/10 text-[#D1AC81] transition hover:scale-105 hover:border-[#C3986E] hover:bg-[#C3986E] hover:text-[#FAFBF9]";
@@ -50,8 +19,35 @@ export default function Footer() {
   const [showTop, setShowTop] = useState(false);
 
   const brandName = locale === "ar" ? site.companyNameAr : site.companyNameEn;
-  const phone = site.phone || COMPANY.phone;
-  const phoneTel = site.phoneTel || COMPANY.phoneTel;
+  const phones =
+    site.phones?.length > 0
+      ? site.phones
+      : site.phone
+        ? [{ label: "", display: site.phone, tel: site.phoneTel || COMPANY.phoneTel }]
+        : [{ label: "", display: COMPANY.phone, tel: COMPANY.phoneTel }];
+
+  const socials =
+    site.socials?.length > 0
+      ? site.socials
+      : [
+          site.facebook
+            ? { label: "Facebook", url: site.facebook, icon: "facebook" as const }
+            : null,
+          site.tiktok
+            ? { label: "TikTok", url: site.tiktok, icon: "tiktok" as const }
+            : null,
+          site.instagram
+            ? { label: "Instagram", url: site.instagram, icon: "instagram" as const }
+            : null,
+          site.youtube
+            ? { label: "YouTube", url: site.youtube, icon: "youtube" as const }
+            : null,
+        ].filter(Boolean) as {
+          label: string;
+          url: string;
+          icon: "facebook" | "tiktok" | "instagram" | "youtube";
+        }[];
+
   const locations =
     site.branches?.length > 0
       ? site.branches.map(branchLocationLine)
@@ -108,52 +104,22 @@ export default function Footer() {
                 {brandName || COMPANY.nameAr} — {site.footerBlurb || t.footer.blurb}
               </p>
 
-              <div className="mt-6 flex flex-wrap items-center gap-2">
-                {site.facebook ? (
-                  <a
-                    href={site.facebook}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Facebook"
-                    className={socialBtnClass}
-                  >
-                    <FacebookIcon className="h-4 w-4" />
-                  </a>
-                ) : null}
-                {site.tiktok ? (
-                  <a
-                    href={site.tiktok}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="TikTok"
-                    className={socialBtnClass}
-                  >
-                    <TikTokIcon className="h-4 w-4" />
-                  </a>
-                ) : null}
-                {site.instagram ? (
-                  <a
-                    href={site.instagram}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Instagram"
-                    className={socialBtnClass}
-                  >
-                    <InstagramIcon className="h-4 w-4" />
-                  </a>
-                ) : null}
-                {site.youtube ? (
-                  <a
-                    href={site.youtube}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="YouTube"
-                    className={socialBtnClass}
-                  >
-                    <YoutubeIcon className="h-4 w-4" />
-                  </a>
-                ) : null}
-              </div>
+              {socials.length > 0 ? (
+                <div className="mt-6 flex flex-wrap items-center gap-2">
+                  {socials.map((social, i) => (
+                    <a
+                      key={`ft-social-${i}-${social.url}`}
+                      href={social.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={social.label || social.icon}
+                      className={socialBtnClass}
+                    >
+                      <SocialIcon icon={social.icon} className="h-4 w-4" />
+                    </a>
+                  ))}
+                </div>
+              ) : null}
             </div>
 
             <div className="lg:col-span-3">
@@ -193,15 +159,22 @@ export default function Footer() {
                 {t.footer.directContact}
               </p>
               <ul className="space-y-3 text-sm">
-                <li>
-                  <a
-                    href={`tel:${phoneTel}`}
-                    className="font-medium text-[#FFFFFF] transition hover:text-[#D1AC81]"
-                    dir="ltr"
-                  >
-                    {phone}
-                  </a>
-                </li>
+                {phones.map((phone, i) => (
+                  <li key={`ft-phone-${i}`}>
+                    {phone.label ? (
+                      <span className="mb-0.5 block text-[11px] text-[#D1AC81]/80">
+                        {phone.label}
+                      </span>
+                    ) : null}
+                    <a
+                      href={phone.tel ? `tel:${phone.tel}` : undefined}
+                      className="font-medium text-[#FFFFFF] transition hover:text-[#D1AC81]"
+                      dir="ltr"
+                    >
+                      {phone.display || phone.tel}
+                    </a>
+                  </li>
+                ))}
                 {site.email ? (
                   <li>
                     <a
