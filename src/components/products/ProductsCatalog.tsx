@@ -9,6 +9,8 @@ import {
 } from "firebase/firestore";
 import { motion } from "framer-motion";
 import { db } from "@/lib/firebase";
+import ImageCarousel from "@/components/products/ImageCarousel";
+import { normalizeProductMedia } from "@/lib/product-media";
 
 type FirestoreProduct = {
   id: string;
@@ -16,7 +18,8 @@ type FirestoreProduct = {
   category: string;
   description: string;
   mediaUrl: string;
-  mediaType: string;
+  mediaType: "image" | "video";
+  images: string[];
 };
 
 type FirestoreCategory = {
@@ -26,48 +29,27 @@ type FirestoreCategory = {
 
 const ALL = "__all__";
 
-function isVideoFile(mediaUrl: string, mediaType: string): boolean {
-  if (mediaType === "video") return true;
-  if (!mediaUrl) return false;
-  return /\.(mp4|webm|ogg|mov|m4v)($|\?)/i.test(mediaUrl);
+function isVideoProduct(item: FirestoreProduct): boolean {
+  return item.mediaType === "video" && Boolean(item.mediaUrl) && item.images.length === 0;
 }
 
-function MediaPreview({
-  mediaUrl,
-  mediaType,
-  title,
-}: {
-  mediaUrl: string;
-  mediaType: string;
-  title: string;
-}) {
+function VideoPreview({ mediaUrl, title }: { mediaUrl: string; title: string }) {
   if (!mediaUrl) {
     return (
-      <div className="flex h-full items-center justify-center bg-[#1A1612] text-xs text-neutral-500">
+      <div className="flex h-full min-h-[11rem] items-center justify-center bg-[#1A1612] text-xs text-neutral-500">
         لا توجد وسائط
       </div>
     );
   }
 
-  if (isVideoFile(mediaUrl, mediaType)) {
-    return (
-      <video
-        src={mediaUrl}
-        controls
-        playsInline
-        preload="metadata"
-        className="h-full w-full object-cover"
-      />
-    );
-  }
-
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
+    <video
       src={mediaUrl}
-      alt={title}
+      controls
+      playsInline
+      preload="metadata"
       className="h-full w-full object-cover"
-      loading="lazy"
+      aria-label={title}
     />
   );
 }
@@ -84,7 +66,6 @@ export default function ProductsCatalog() {
 
   const scroll = (ref: React.RefObject<HTMLDivElement | null>, direction: "left" | "right") => {
     if (ref.current) {
-      // التمرير لمسافة كارت واحد (حوالي 360px مع الفراغ)
       const scrollAmount = direction === "left" ? -360 : 360;
       ref.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
     }
@@ -128,14 +109,16 @@ export default function ProductsCatalog() {
           .sort((a, b) => a.name.localeCompare(b.name, "ar"));
 
         const items: FirestoreProduct[] = prodDocs.map((docSnap) => {
-          const data = docSnap.data();
+          const data = docSnap.data() as Record<string, unknown>;
+          const media = normalizeProductMedia(data);
           return {
             id: docSnap.id,
             title: String(data.title ?? ""),
             category: String(data.category ?? ""),
             description: String(data.description ?? ""),
-            mediaUrl: String(data.mediaUrl ?? ""),
-            mediaType: String(data.mediaType ?? "image"),
+            mediaUrl: media.mediaUrl,
+            mediaType: media.mediaType,
+            images: media.images,
           };
         });
 
@@ -169,7 +152,7 @@ export default function ProductsCatalog() {
     const videos: FirestoreProduct[] = [];
 
     filtered.forEach((item) => {
-      if (isVideoFile(item.mediaUrl, item.mediaType)) {
+      if (isVideoProduct(item)) {
         videos.push(item);
       } else {
         images.push(item);
@@ -184,7 +167,7 @@ export default function ProductsCatalog() {
     [categories]
   );
 
-  const renderCard = (item: FirestoreProduct, index: number) => (
+  const renderCard = (item: FirestoreProduct, index: number, mode: "image" | "video") => (
     <motion.article
       key={item.id}
       initial={{ opacity: 0, y: 18 }}
@@ -193,14 +176,25 @@ export default function ProductsCatalog() {
         delay: Math.min(index * 0.04, 0.35),
         duration: 0.35,
       }}
-      className="h-full overflow-hidden rounded-2xl border border-[rgba(209,172,129,0.2)] bg-[#241E18] transition-all duration-300 hover:border-[#C3986E] hover:shadow-xl"
+      className="flex h-full flex-col overflow-hidden rounded-2xl border border-[rgba(209,172,129,0.2)] bg-[#241E18] transition-all duration-300 hover:border-[#C3986E] hover:shadow-xl"
     >
-      <div className="aspect-[16/11] overflow-hidden bg-[#1A1612]">
-        <MediaPreview
-          mediaUrl={item.mediaUrl}
-          mediaType={item.mediaType}
-          title={item.title}
-        />
+      <div className="relative overflow-hidden bg-[#1A1612]">
+        {mode === "video" ? (
+          <div className="aspect-[16/11]">
+            <VideoPreview mediaUrl={item.mediaUrl} title={item.title} />
+          </div>
+        ) : (
+          <ImageCarousel
+            images={item.images.length ? item.images : item.mediaUrl ? [item.mediaUrl] : []}
+            alt={item.title || "منتج"}
+            compact
+          />
+        )}
+        {mode === "image" && item.images.length > 1 ? (
+          <span className="pointer-events-none absolute top-2 left-2 z-20 rounded-full border border-[#D1AC81]/35 bg-black/55 px-2 py-0.5 text-[10px] font-semibold text-[#D1AC81] backdrop-blur-md">
+            {item.images.length} صور
+          </span>
+        ) : null}
       </div>
       <div className="space-y-2 p-4 sm:p-5" dir="rtl">
         {item.category ? (
@@ -208,13 +202,9 @@ export default function ProductsCatalog() {
             {item.category}
           </span>
         ) : null}
-        <h2 className="text-lg font-bold text-[#FAFBF9] sm:text-xl">
-          {item.title}
-        </h2>
+        <h2 className="text-lg font-bold text-[#FAFBF9] sm:text-xl">{item.title}</h2>
         {item.description ? (
-          <p className="text-sm leading-relaxed text-[#E2E8F0]/85">
-            {item.description}
-          </p>
+          <p className="text-sm leading-relaxed text-[#E2E8F0]/85">{item.description}</p>
         ) : null}
       </div>
     </motion.article>
@@ -238,9 +228,7 @@ export default function ProductsCatalog() {
             جاري تحميل المنتجات...
           </p>
         ) : error ? (
-          <p className="py-20 text-center text-base text-red-300/90 sm:text-lg">
-            {error}
-          </p>
+          <p className="py-20 text-center text-base text-red-300/90 sm:text-lg">{error}</p>
         ) : (
           <>
             <div
@@ -276,20 +264,21 @@ export default function ProductsCatalog() {
               </p>
             ) : (
               <div className="space-y-16">
-                {/* 📸 معرض الصور */}
                 {imagesList.length > 0 && (
                   <div className="space-y-6">
-                    <div className="flex items-center justify-between border-r-4 border-[#C3986E] pr-3" dir="rtl">
+                    <div
+                      className="flex items-center justify-between border-r-4 border-[#C3986E] pr-3"
+                      dir="rtl"
+                    >
                       <div className="flex items-center gap-3">
                         <h2 className="text-2xl font-bold text-[#FAFBF9] sm:text-3xl">
                           معرض الصور
                         </h2>
-                        <span className="text-xs font-semibold text-[#D1AC81] bg-[#241E18] px-2.5 py-1 rounded-full border border-[#D1AC81]/20">
+                        <span className="rounded-full border border-[#D1AC81]/20 bg-[#241E18] px-2.5 py-1 text-xs font-semibold text-[#D1AC81]">
                           {imagesList.length}
                         </span>
                       </div>
 
-                      {/* أزرار الأسهم للصور */}
                       <div className="flex items-center gap-2" dir="ltr">
                         <button
                           type="button"
@@ -310,7 +299,6 @@ export default function ProductsCatalog() {
                       </div>
                     </div>
 
-                    {/* حاوية السلايدر للصور */}
                     <div
                       ref={imagesScrollRef}
                       className="flex gap-5 overflow-x-auto scroll-smooth pb-4 no-scrollbar"
@@ -321,27 +309,28 @@ export default function ProductsCatalog() {
                           key={item.id}
                           className="w-[85vw] max-w-[340px] flex-shrink-0 sm:w-[320px] md:w-[340px]"
                         >
-                          {renderCard(item, index)}
+                          {renderCard(item, index, "image")}
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
 
-                {/* 🎥 معرض الفيديوهات */}
                 {videosList.length > 0 && (
                   <div className="space-y-6">
-                    <div className="flex items-center justify-between border-r-4 border-[#C3986E] pr-3" dir="rtl">
+                    <div
+                      className="flex items-center justify-between border-r-4 border-[#C3986E] pr-3"
+                      dir="rtl"
+                    >
                       <div className="flex items-center gap-3">
                         <h2 className="text-2xl font-bold text-[#FAFBF9] sm:text-3xl">
                           معرض الفيديوهات
                         </h2>
-                        <span className="text-xs font-semibold text-[#D1AC81] bg-[#241E18] px-2.5 py-1 rounded-full border border-[#D1AC81]/20">
+                        <span className="rounded-full border border-[#D1AC81]/20 bg-[#241E18] px-2.5 py-1 text-xs font-semibold text-[#D1AC81]">
                           {videosList.length}
                         </span>
                       </div>
 
-                      {/* أزرار الأسهم للفيديوهات */}
                       <div className="flex items-center gap-2" dir="ltr">
                         <button
                           type="button"
@@ -362,7 +351,6 @@ export default function ProductsCatalog() {
                       </div>
                     </div>
 
-                    {/* حاوية السلايدر للفيديوهات */}
                     <div
                       ref={videosScrollRef}
                       className="flex gap-5 overflow-x-auto scroll-smooth pb-4 no-scrollbar"
@@ -373,7 +361,7 @@ export default function ProductsCatalog() {
                           key={item.id}
                           className="w-[85vw] max-w-[340px] flex-shrink-0 sm:w-[320px] md:w-[340px]"
                         >
-                          {renderCard(item, index)}
+                          {renderCard(item, index, "video")}
                         </div>
                       ))}
                     </div>

@@ -432,3 +432,12 @@ input[type="range"].brand-range::-moz-range-thumb {
     color-mix(in srgb, var(--brown) 6%, transparent) 13px
   );
 }
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

@@ -198,14 +198,21 @@
                   <option value="">اختر التصنيف</option>
                 </select>
                 <textarea id="product-description" required rows="3" class="field" placeholder="الوصف"></textarea>
-                <input
-                  id="product-media"
-                  required
-                  type="file"
-                  accept="image/*,video/*"
-                  class="field file:ml-3 file:rounded-lg file:border-0 file:bg-gold file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-ink"
-                />
-                <p class="text-xs text-mist/60">تُرفع الصورة أو الفيديو إلى التخزين، ويُحفظ الرابط العام في قاعدة البيانات.</p>
+                <div class="rounded-2xl border border-sand/15 bg-ink/50 p-3">
+                  <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
+                    <label class="text-sm font-bold text-sand" for="product-media">صور / فيديو المنتج</label>
+                    <span id="product-media-count" class="text-[11px] text-mist/55">0 ملفات</span>
+                  </div>
+                  <input
+                    id="product-media"
+                    type="file"
+                    accept="image/*,video/*"
+                    multiple
+                    class="field file:ml-3 file:rounded-lg file:border-0 file:bg-gold file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-ink"
+                  />
+                  <p class="mt-2 text-xs text-mist/60">يمكنك اختيار عدة صور دفعة واحدة. للفيديو اكتفِ بملف واحد. احذف أي معاينة قبل الحفظ إن لزم.</p>
+                  <div id="product-media-preview" class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3"></div>
+                </div>
                 <button
                   id="product-submit"
                   type="submit"
@@ -616,7 +623,13 @@
       }
 
       function mediaMarkup(item) {
-        const src = safeUrl(item.mediaUrl);
+        const images = Array.isArray(item.images)
+          ? item.images.filter((url) => typeof url === "string" && url.trim())
+          : [];
+        const primary =
+          images[0] ||
+          (typeof item.mediaUrl === "string" ? item.mediaUrl : "");
+        const src = safeUrl(primary);
         if (!src) {
           return '<div class="flex h-40 items-center justify-center rounded-xl bg-ink text-xs text-mist/50">لا توجد وسائط</div>';
         }
@@ -629,7 +642,64 @@
         if (type === "video") {
           return `<video src="${escapeHtml(src)}" class="h-40 w-full rounded-xl bg-black object-cover" controls playsinline preload="metadata" autocomplete="off"></video>`;
         }
-        return `<img src="${escapeHtml(src)}" alt="" class="h-40 w-full rounded-xl object-cover" />`;
+        const thumbs =
+          images.length > 1
+            ? `<div class="mt-2 flex gap-1 overflow-x-auto pb-1">${images
+                .slice(0, 6)
+                .map(
+                  (url) =>
+                    `<img src="${escapeHtml(safeUrl(url))}" alt="" class="h-10 w-12 shrink-0 rounded-md object-cover border border-sand/20" />`
+                )
+                .join("")}${
+                images.length > 6
+                  ? `<span class="flex h-10 shrink-0 items-center rounded-md bg-panel px-2 text-[10px] text-sand">+${images.length - 6}</span>`
+                  : ""
+              }</div>`
+            : "";
+        return `<img src="${escapeHtml(src)}" alt="" class="h-40 w-full rounded-xl object-cover" />${thumbs}`;
+      }
+
+      /** Pending product media before upload */
+      let productDraftMedia = [];
+
+      function revokeDraftPreviews() {
+        productDraftMedia.forEach((item) => {
+          if (item.previewUrl?.startsWith("blob:")) URL.revokeObjectURL(item.previewUrl);
+        });
+      }
+
+      function renderProductDraftMedia() {
+        const list = document.getElementById("product-media-preview");
+        const count = document.getElementById("product-media-count");
+        if (count) count.textContent = `${productDraftMedia.length} ملف`;
+        if (!list) return;
+        if (!productDraftMedia.length) {
+          list.innerHTML =
+            '<p class="col-span-full rounded-xl border border-dashed border-sand/20 py-6 text-center text-xs text-mist/50">لم تُختر ملفات بعد</p>';
+          return;
+        }
+        list.innerHTML = productDraftMedia
+          .map((item, index) => {
+            const isVideo = item.mediaType === "video";
+            const preview = isVideo
+              ? `<video src="${escapeHtml(item.previewUrl)}" class="h-24 w-full rounded-lg bg-black object-cover" muted playsinline></video>`
+              : `<img src="${escapeHtml(item.previewUrl)}" alt="" class="h-24 w-full rounded-lg object-cover" />`;
+            return `
+              <div class="dyn-card relative space-y-1.5 p-2">
+                ${preview}
+                <p class="truncate text-[10px] text-mist/60">${escapeHtml(item.name || "")}</p>
+                <button type="button" data-draft-remove="${index}" class="btn-danger w-full">إزالة</button>
+              </div>`;
+          })
+          .join("");
+      }
+
+      function resetProductDraftMedia() {
+        revokeDraftPreviews();
+        productDraftMedia = [];
+        const input = document.getElementById("product-media");
+        if (input) input.value = "";
+        renderProductDraftMedia();
       }
 
       function emptyState(text) {
@@ -737,18 +807,28 @@
           return;
         }
         list.innerHTML = items
-          .map(
-            (item) => `
+          .map((item) => {
+            const imageCount = Array.isArray(item.images)
+              ? item.images.filter(Boolean).length
+              : item.mediaUrl && item.mediaType !== "video"
+                ? 1
+                : 0;
+            const countBadge =
+              imageCount > 1
+                ? `<span class="mt-2 inline-block rounded-full border border-sand/25 px-2 py-0.5 text-[10px] text-sand">${imageCount} صور</span>`
+                : "";
+            return `
               <article class="overflow-hidden rounded-2xl border border-sand/15 bg-ink p-3">
                 ${mediaMarkup(item)}
                 <div class="mt-3">
                   <p class="text-xs text-sand">${escapeHtml(item.category || "بدون تصنيف")}</p>
                   <h3 class="mt-1 font-bold text-white">${escapeHtml(item.title || "منتج")}</h3>
                   <p class="mt-2 text-sm leading-relaxed text-mist/80">${escapeHtml(item.description || "")}</p>
+                  ${countBadge}
                   <button type="button" data-delete="products" data-id="${escapeHtml(item.id)}" class="mt-3 rounded-lg border border-red-400/40 px-3 py-1.5 text-xs text-red-200">حذف</button>
                 </div>
-              </article>`
-          )
+              </article>`;
+          })
           .join("");
       }
 
@@ -1272,10 +1352,35 @@
         }
       });
 
+      document.getElementById("product-media").addEventListener("change", (event) => {
+        const files = [...(event.target.files || [])];
+        if (!files.length) return;
+        files.forEach((file) => {
+          const mediaType = mediaTypeOf(file);
+          productDraftMedia.push({
+            file,
+            name: file.name,
+            mediaType,
+            previewUrl: URL.createObjectURL(file),
+          });
+        });
+        event.target.value = "";
+        renderProductDraftMedia();
+      });
+
+      document.getElementById("product-media-preview").addEventListener("click", (event) => {
+        const button = event.target.closest("[data-draft-remove]");
+        if (!button) return;
+        const index = Number(button.dataset.draftRemove);
+        const item = productDraftMedia[index];
+        if (item?.previewUrl?.startsWith("blob:")) URL.revokeObjectURL(item.previewUrl);
+        productDraftMedia.splice(index, 1);
+        renderProductDraftMedia();
+      });
+
       document.getElementById("product-form").addEventListener("submit", async (event) => {
         event.preventDefault();
         const button = document.getElementById("product-submit");
-        const file = document.getElementById("product-media").files[0];
         const title = document.getElementById("product-title").value.trim();
         const category = document.getElementById("product-category").value;
         const description = document.getElementById("product-description").value.trim();
@@ -1283,24 +1388,60 @@
           notify("أكمل عنوان المنتج والتصنيف والوصف.", "error");
           return;
         }
-        if (!file) {
-          notify("اختر صورة أو فيديو للمنتج.", "error");
+        if (!productDraftMedia.length) {
+          notify("أضف صورة واحدة على الأقل أو فيديو للمنتج.", "error");
           return;
         }
 
-        setBusy(button, true, "حفظ المنتج");
+        setBusy(button, true, "حفظ المنتج", "جاري رفع الوسائط…");
         try {
-          const media = await mediaFromFile(file);
+          const uploaded = [];
+          for (const item of productDraftMedia) {
+            const mediaUrl = await uploadToSupabase(item.file);
+            uploaded.push({
+              mediaUrl,
+              mediaType: item.mediaType === "video" ? "video" : "image",
+            });
+          }
+
+          const imageUrls = uploaded
+            .filter((item) => item.mediaType === "image")
+            .map((item) => item.mediaUrl);
+          const videoUrls = uploaded
+            .filter((item) => item.mediaType === "video")
+            .map((item) => item.mediaUrl);
+
+          let mediaUrl = "";
+          let mediaType = "image";
+          let images = [];
+
+          if (imageUrls.length) {
+            images = imageUrls;
+            mediaUrl = imageUrls[0];
+            mediaType = "image";
+          } else if (videoUrls.length) {
+            mediaUrl = videoUrls[0];
+            mediaType = "video";
+            images = [];
+          }
+
           await addDoc(collection(db, "products"), {
             title,
             category,
             description,
-            mediaUrl: media.mediaUrl,
-            mediaType: media.mediaType,
+            mediaUrl,
+            mediaType,
+            images,
             createdAt: serverTimestamp(),
           });
           event.target.reset();
-          notify(media.notice || "تم حفظ المنتج.", "ok");
+          resetProductDraftMedia();
+          notify(
+            images.length > 1
+              ? `تم حفظ المنتج مع ${images.length} صور.`
+              : "تم حفظ المنتج.",
+            "ok"
+          );
         } catch (error) {
           notify(errorMessage(error), "error");
         } finally {
@@ -1590,6 +1731,7 @@
       });
 
       if (sessionStorage.getItem(SESSION_KEY) === "1") openApp();
+      renderProductDraftMedia();
     </script>
   </body>
 </html>
