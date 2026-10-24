@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type TouchEvent as ReactTouchEvent,
+} from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut } from "lucide-react";
@@ -93,12 +99,12 @@ export default function ProductLightbox({
     });
   }, [open, index, images, total]);
 
-  const onTouchStart = (e: React.TouchEvent) => {
+  const onTouchStart = (e: ReactTouchEvent) => {
     const t = e.changedTouches[0];
     touchStart.current = { x: t.clientX, y: t.clientY };
   };
 
-  const onTouchEnd = (e: React.TouchEvent) => {
+  const onTouchEnd = (e: ReactTouchEvent) => {
     if (!touchStart.current || zoomed) return;
     const t = e.changedTouches[0];
     const dx = t.clientX - touchStart.current.x;

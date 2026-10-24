@@ -22,21 +22,23 @@ const assetsDir = join(outDir, "assets");
 mkdirSync(cssMirrorDir, { recursive: true });
 mkdirSync(assetsDir, { recursive: true });
 
-/** Largest CSS chunk = compiled Tailwind/globals bundle */
+/** Largest CSS file = compiled Tailwind/globals bundle (chunks or css/) */
 function findMainCss() {
-  if (!existsSync(chunksDir)) return null;
-  const files = readdirSync(chunksDir).filter((f) => f.endsWith(".css"));
-  if (!files.length) return null;
-  let best = files[0];
+  const searchDirs = [chunksDir, cssMirrorDir].filter((dir) => existsSync(dir));
+  let bestPath = null;
   let bestSize = 0;
-  for (const f of files) {
-    const size = statSync(join(chunksDir, f)).size;
-    if (size > bestSize) {
-      bestSize = size;
-      best = f;
+  for (const dir of searchDirs) {
+    for (const name of readdirSync(dir)) {
+      if (!name.endsWith(".css") || name === "site.css") continue;
+      const full = join(dir, name);
+      const size = statSync(full).size;
+      if (size > bestSize) {
+        bestSize = size;
+        bestPath = full;
+      }
     }
   }
-  return join(chunksDir, best);
+  return bestPath;
 }
 
 const mainCss = findMainCss();

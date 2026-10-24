@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Image from "next/image";
 import { mediaCandidates } from "@/lib/assets";
 
 type PublicMediaImgProps = {
@@ -11,6 +10,7 @@ type PublicMediaImgProps = {
   loading?: "lazy" | "eager";
   /** Prefer for above-the-fold / active carousel slide */
   priority?: boolean;
+  /** Kept for API compatibility with next/image call sites */
   sizes?: string;
   onAllFailed?: () => void;
   /** Subtle pulse placeholder until the image loads */
@@ -49,9 +49,9 @@ function splitClassName(className?: string) {
 }
 
 /**
- * Optimized media image for local + remote (Supabase) URLs.
- * Uses next/image (unoptimized under static export) with lazy loading,
- * candidate fallbacks, and an optional skeleton blur placeholder.
+ * Static-export safe media image (GitHub Pages).
+ * Uses native <img> with lazy loading + skeleton — avoids next/image
+ * Image Optimization API which is incompatible with `output: "export"`.
  */
 export default function PublicMediaImg({
   src,
@@ -74,19 +74,18 @@ export default function PublicMediaImg({
     setLoaded(false);
   }, [src]);
 
-  if (i >= candidates.length) {
-    onAllFailed?.();
+  if (!src?.trim() || i >= candidates.length) {
+    if (i >= candidates.length) onAllFailed?.();
     return (
       <div
         className={`flex items-center justify-center bg-[#1A1612] text-xs text-neutral-500 ${parts.layout}`}
       >
-        {src}
+        {src || "لا توجد صورة"}
       </div>
     );
   }
 
   const current = candidates[i];
-  const isRemote = /^https?:\/\//i.test(current);
 
   return (
     <span className={`relative block overflow-hidden ${parts.layout}`}>
@@ -99,18 +98,16 @@ export default function PublicMediaImg({
         </span>
       ) : null}
 
-      <Image
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
         key={current}
         src={current}
         alt={alt}
-        fill
         sizes={sizes}
-        priority={priority}
-        loading={priority ? undefined : loading}
-        // Remote uploads + static export: skip optimizer; still get lazy + sizing
-        unoptimized={isRemote}
+        loading={priority ? "eager" : loading}
         decoding="async"
-        className={`${parts.objectFit} ${parts.motion} transition-opacity duration-500 ease-out ${
+        fetchPriority={priority ? "high" : "auto"}
+        className={`absolute inset-0 h-full w-full ${parts.objectFit} ${parts.motion} transition-opacity duration-500 ease-out ${
           loaded ? "opacity-100" : "opacity-0"
         }`}
         onLoad={() => {
