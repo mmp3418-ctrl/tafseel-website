@@ -6,8 +6,9 @@ import "./globals.css";
 const cairo = Cairo({
   variable: "--font-cairo",
   subsets: ["arabic", "latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
+  weight: ["400", "600", "700"],
   display: "swap",
+  preload: true,
 });
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "/tafseel-website";

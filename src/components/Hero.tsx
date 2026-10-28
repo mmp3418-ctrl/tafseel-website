@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import Link from "next/link";
 import { COMPANY } from "@/lib/products";
 import { useApp } from "@/components/providers/AppProviders";
 import { asset } from "@/lib/assets";
@@ -44,7 +45,11 @@ export default function Hero({ home }: HeroProps) {
     t?.hero?.subtitle ||
     "أنظمة مظلات حديثة وهياكل معمارية متطورة مصممة بأعلى معايير الأناقة والمتانة للمنازل والمنشآت الفاخرة في ليبيا.";
   const ctaWhatsapp = data?.ctaWhatsapp || t?.hero?.ctaWhatsapp || "تواصل معنا عبر واتساب";
-  const ctaProjects = data?.ctaProjects || t?.hero?.ctaProjects || "استكشف مشاريعنا";
+  const ctaProducts =
+    data?.ctaProjects ||
+    t?.hero?.ctaProducts ||
+    t?.hero?.ctaProjects ||
+    "عرض منتجاتنا";
   const whatsappHref = data?.whatsappUrl || site.whatsappUrl || COMPANY.whatsappUrl;
 
   return (
@@ -57,6 +62,7 @@ export default function Hero({ home }: HeroProps) {
             autoPlay
             muted
             playsInline
+            preload="metadata"
             onTimeUpdate={handleTimeUpdate}
             className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover opacity-60 mix-blend-overlay"
             aria-hidden
@@ -112,12 +118,12 @@ export default function Hero({ home }: HeroProps) {
               >
                 {ctaWhatsapp}
               </a>
-              <a
-                href="#applications"
+              <Link
+                href="/products/"
                 className="w-full rounded-full border border-[#D1AC81]/50 bg-black/25 px-6 py-3.5 text-center text-sm font-medium text-[#FAFBF9] backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:border-[#C3986E] hover:bg-white/15 sm:w-auto sm:px-8 sm:py-4 sm:text-base"
               >
-                {ctaProjects}
-              </a>
+                {ctaProducts}
+              </Link>
             </div>
           </div>
         </div>

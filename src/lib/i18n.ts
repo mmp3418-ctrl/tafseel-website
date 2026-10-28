@@ -18,7 +18,8 @@ export const translations = {
       subtitle:
         "أنظمة مظلات حديثة وهياكل معمارية متطورة مصممة بأعلى معايير الأناقة والمتانة للمنازل والمنشآت الفاخرة في ليبيا.",
       ctaWhatsapp: "تواصل معنا عبر واتساب",
-      ctaProjects: "استكشف مشاريعنا",
+      ctaProjects: "عرض منتجاتنا",
+      ctaProducts: "عرض منتجاتنا",
     },
     gallery: {
       title: "معرض أعمالنا الحصرية",
@@ -164,7 +165,8 @@ export const translations = {
       subtitle:
         "Modern canopy systems and advanced architectural structures designed with elegance and durability for luxury homes and commercial sites in Libya.",
       ctaWhatsapp: "Chat on WhatsApp",
-      ctaProjects: "Explore our projects",
+      ctaProjects: "View our products",
+      ctaProducts: "View our products",
     },
     gallery: {
       title: "Exclusive project gallery",

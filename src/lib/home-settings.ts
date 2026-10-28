@@ -1,5 +1,6 @@
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { readCache, writeCache } from "@/lib/session-cache";
 
 export type HomeMedia = {
   mediaUrl: string;
@@ -118,6 +119,16 @@ function text(value: unknown, fallback: string) {
 
 function optionalText(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
+}
+
+const LEGACY_PROJECT_CTAS = new Set([
+  "استكشف مشاريعنا",
+  "عرض المشاريع",
+  "Explore our projects",
+]);
+
+function migrateCtaLabel(value: string, fallback: string) {
+  return LEGACY_PROJECT_CTAS.has(value) ? fallback : value;
 }
 
 function mediaType(value: unknown, url: string): "image" | "video" {
@@ -253,7 +264,7 @@ export const DEFAULT_HOME_SETTINGS: HomeSettings = {
     "أنظمة مظلات حديثة وهياكل معمارية متطورة مصممة بأعلى معايير الأناقة والمتانة للمنازل والمنشآت الفاخرة في ليبيا.",
   heroVideoUrl: "",
   ctaWhatsapp: "تواصل معنا عبر واتساب",
-  ctaProjects: "استكشف مشاريعنا",
+  ctaProjects: "عرض منتجاتنا",
   productsTitle: "سلسلة المنتجات",
   productsSubtitle: "اختر من بين تشكيلتنا الفاخرة المحدثة للمظلات المعمارية",
   orderLabel: "اطلب الآن",
@@ -340,7 +351,7 @@ export function mergeHomeSettings(raw: Record<string, unknown> | undefined): Hom
     heroSubtitle: text(data.heroSubtitle, base.heroSubtitle),
     heroVideoUrl: text(data.heroVideoUrl, ""),
     ctaWhatsapp: text(data.ctaWhatsapp, base.ctaWhatsapp),
-    ctaProjects: text(data.ctaProjects, base.ctaProjects),
+    ctaProjects: migrateCtaLabel(text(data.ctaProjects, base.ctaProjects), base.ctaProjects),
     productsTitle: text(data.productsTitle, base.productsTitle),
     productsSubtitle: text(data.productsSubtitle, base.productsSubtitle),
     orderLabel: text(data.orderLabel, base.orderLabel),
@@ -369,10 +380,23 @@ export function mergeHomeSettings(raw: Record<string, unknown> | undefined): Hom
 }
 
 export async function loadHomeSettings(): Promise<HomeSettings> {
+  const cached = readCache<HomeSettings>("home_settings_main");
+  if (cached) {
+    return {
+      ...cached,
+      ctaProjects: migrateCtaLabel(
+        cached.ctaProjects || DEFAULT_HOME_SETTINGS.ctaProjects,
+        DEFAULT_HOME_SETTINGS.ctaProjects
+      ),
+    };
+  }
   try {
     const snapshot = await getDoc(doc(db, "home_settings", HOME_SETTINGS_DOC));
-    if (!snapshot.exists()) return mergeHomeSettings(undefined);
-    return mergeHomeSettings(snapshot.data() as Record<string, unknown>);
+    const settings = snapshot.exists()
+      ? mergeHomeSettings(snapshot.data() as Record<string, unknown>)
+      : mergeHomeSettings(undefined);
+    writeCache("home_settings_main", settings);
+    return settings;
   } catch (error) {
     console.error("home_settings load failed:", error);
     return mergeHomeSettings(undefined);

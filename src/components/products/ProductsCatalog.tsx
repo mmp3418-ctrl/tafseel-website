@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   collection,
   getDocs,
@@ -11,6 +11,7 @@ import { motion } from "framer-motion";
 import { db } from "@/lib/firebase";
 import ImageCarousel from "@/components/products/ImageCarousel";
 import { normalizeProductMedia } from "@/lib/product-media";
+import { readCache, writeCache } from "@/lib/session-cache";
 
 type FirestoreProduct = {
   id: string;
@@ -28,6 +29,8 @@ type FirestoreCategory = {
 };
 
 const ALL = "__all__";
+const PRODUCTS_CACHE = "catalog_products_v2";
+const CATEGORIES_CACHE = "catalog_categories_v2";
 
 function isVideoProduct(item: FirestoreProduct): boolean {
   return item.mediaType === "video" && Boolean(item.mediaUrl) && item.images.length === 0;
@@ -47,53 +50,79 @@ function VideoPreview({ mediaUrl, title }: { mediaUrl: string; title: string }) 
       src={mediaUrl}
       controls
       playsInline
-      preload="metadata"
+      preload="none"
       className="h-full w-full object-cover"
       aria-label={title}
     />
   );
 }
 
+function CatalogSkeleton() {
+  return (
+    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {Array.from({ length: 6 }, (_, i) => (
+        <div
+          key={i}
+          className="overflow-hidden rounded-2xl border border-[#D1AC81]/15 bg-[#241E18]"
+        >
+          <div className="aspect-[16/11] animate-pulse bg-[#1A1612]" />
+          <div className="space-y-3 p-5">
+            <div className="h-4 w-20 animate-pulse rounded-full bg-[#2A231C]" />
+            <div className="h-6 w-3/4 animate-pulse rounded-lg bg-[#2A231C]" />
+            <div className="h-3 w-full animate-pulse rounded bg-[#2A231C]/80" />
+            <div className="h-3 w-2/3 animate-pulse rounded bg-[#2A231C]/60" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function EmptyState({ message }: { message: string }) {
+  return (
+    <div className="mx-auto flex max-w-md flex-col items-center gap-3 rounded-3xl border border-dashed border-[#D1AC81]/30 bg-[#241E18]/50 px-6 py-16 text-center">
+      <div className="h-14 w-14 rounded-2xl border border-dashed border-[#D1AC81]/25 bg-[#1A1612]" />
+      <p className="text-sm text-brand-text-light sm:text-base">{message}</p>
+    </div>
+  );
+}
+
 export default function ProductsCatalog() {
-  const [categories, setCategories] = useState<FirestoreCategory[]>([]);
-  const [products, setProducts] = useState<FirestoreProduct[]>([]);
+  const [categories, setCategories] = useState<FirestoreCategory[]>(
+    () => readCache<FirestoreCategory[]>(CATEGORIES_CACHE) ?? []
+  );
+  const [products, setProducts] = useState<FirestoreProduct[]>(
+    () => readCache<FirestoreProduct[]>(PRODUCTS_CACHE) ?? []
+  );
   const [activeCategory, setActiveCategory] = useState<string>(ALL);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !readCache(PRODUCTS_CACHE));
   const [error, setError] = useState<string | null>(null);
-
-  const imagesScrollRef = useRef<HTMLDivElement>(null);
-  const videosScrollRef = useRef<HTMLDivElement>(null);
-
-  const scroll = (ref: React.RefObject<HTMLDivElement | null>, direction: "left" | "right") => {
-    if (ref.current) {
-      const scrollAmount = direction === "left" ? -360 : 360;
-      ref.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
-    }
-  };
 
   useEffect(() => {
     let cancelled = false;
 
     async function load() {
-      setLoading(true);
+      const hasCache = Boolean(readCache(PRODUCTS_CACHE));
+      if (!hasCache) setLoading(true);
       setError(null);
       try {
-        const catSnap = await getDocs(collection(db, "categories"));
+        const loadProducts = async () => {
+          try {
+            return (await getDocs(query(collection(db, "products"), orderBy("createdAt", "desc")))).docs;
+          } catch {
+            const snap = await getDocs(collection(db, "products"));
+            return [...snap.docs].sort((a, b) => {
+              const aTime = a.data().createdAt?.toMillis?.() ?? 0;
+              const bTime = b.data().createdAt?.toMillis?.() ?? 0;
+              return bTime - aTime;
+            });
+          }
+        };
 
-        let prodDocs;
-        try {
-          const prodSnap = await getDocs(
-            query(collection(db, "products"), orderBy("createdAt", "desc"))
-          );
-          prodDocs = prodSnap.docs;
-        } catch {
-          const prodSnap = await getDocs(collection(db, "products"));
-          prodDocs = [...prodSnap.docs].sort((a, b) => {
-            const aTime = a.data().createdAt?.toMillis?.() ?? 0;
-            const bTime = b.data().createdAt?.toMillis?.() ?? 0;
-            return bTime - aTime;
-          });
-        }
+        const [catSnap, prodDocs] = await Promise.all([
+          getDocs(collection(db, "categories")),
+          loadProducts(),
+        ]);
 
         if (cancelled) return;
 
@@ -124,12 +153,12 @@ export default function ProductsCatalog() {
 
         setCategories(cats);
         setProducts(items);
+        writeCache(CATEGORIES_CACHE, cats);
+        writeCache(PRODUCTS_CACHE, items);
       } catch (err) {
         console.error("Failed to load products/categories:", err);
-        if (!cancelled) {
+        if (!cancelled && !products.length) {
           setError("تعذر تحميل المنتجات. حاول مرة أخرى لاحقاً.");
-          setCategories([]);
-          setProducts([]);
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -150,15 +179,10 @@ export default function ProductsCatalog() {
   const { imagesList, videosList } = useMemo(() => {
     const images: FirestoreProduct[] = [];
     const videos: FirestoreProduct[] = [];
-
     filtered.forEach((item) => {
-      if (isVideoProduct(item)) {
-        videos.push(item);
-      } else {
-        images.push(item);
-      }
+      if (isVideoProduct(item)) videos.push(item);
+      else images.push(item);
     });
-
     return { imagesList: images, videosList: videos };
   }, [filtered]);
 
@@ -170,13 +194,11 @@ export default function ProductsCatalog() {
   const renderCard = (item: FirestoreProduct, index: number, mode: "image" | "video") => (
     <motion.article
       key={item.id}
-      initial={{ opacity: 0, y: 18 }}
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{
-        delay: Math.min(index * 0.04, 0.35),
-        duration: 0.35,
-      }}
-      className="flex h-full flex-col overflow-hidden rounded-2xl border border-[rgba(209,172,129,0.2)] bg-[#241E18] transition-all duration-300 hover:border-[#C3986E] hover:shadow-xl"
+      transition={{ delay: Math.min(index * 0.03, 0.24), duration: 0.35 }}
+      className="flex h-full flex-col overflow-hidden rounded-2xl border border-[rgba(209,172,129,0.2)] bg-[#241E18] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#C3986E] hover:shadow-xl"
+      style={{ contentVisibility: "auto", containIntrinsicSize: "420px" }}
     >
       <div className="relative overflow-hidden bg-[#1A1612]">
         {mode === "video" ? (
@@ -196,15 +218,15 @@ export default function ProductsCatalog() {
           </span>
         ) : null}
       </div>
-      <div className="space-y-2 p-4 sm:p-5" dir="rtl">
+      <div className="flex flex-1 flex-col space-y-2 p-4 sm:p-5" dir="rtl">
         {item.category ? (
-          <span className="inline-block rounded-full border border-[#D1AC81]/30 px-2.5 py-0.5 text-xs font-semibold text-[#D1AC81]">
+          <span className="inline-flex w-fit rounded-full border border-[#D1AC81]/30 px-2.5 py-0.5 text-xs font-semibold text-[#D1AC81]">
             {item.category}
           </span>
         ) : null}
-        <h2 className="text-lg font-bold text-[#FAFBF9] sm:text-xl">{item.title}</h2>
+        <h2 className="text-lg font-bold leading-snug text-[#FAFBF9] sm:text-xl">{item.title}</h2>
         {item.description ? (
-          <p className="text-sm leading-relaxed text-[#E2E8F0]/85">{item.description}</p>
+          <p className="line-clamp-3 text-sm leading-relaxed text-[#E2E8F0]/85">{item.description}</p>
         ) : null}
       </div>
     </motion.article>
@@ -224,149 +246,82 @@ export default function ProductsCatalog() {
         </div>
 
         {loading ? (
-          <p className="py-20 text-center text-base text-[#D1AC81] sm:text-lg">
-            جاري تحميل المنتجات...
-          </p>
+          <CatalogSkeleton />
         ) : error ? (
-          <p className="py-20 text-center text-base text-red-300/90 sm:text-lg">{error}</p>
+          <EmptyState message={error} />
         ) : (
           <>
-            <div
-              className="mb-8 flex flex-wrap justify-center gap-2 sm:gap-3"
-              role="tablist"
-              aria-label="فئات المنتجات"
-              dir="rtl"
-            >
-              {tabs.map((tab) => {
-                const selected = activeCategory === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    role="tab"
-                    aria-selected={selected}
-                    onClick={() => setActiveCategory(tab.id)}
-                    className={`rounded-full px-4 py-2.5 text-xs font-semibold transition-all duration-300 sm:text-sm ${
-                      selected
-                        ? "scale-[1.02] bg-gradient-to-r from-[#C3986E] to-[#D1AC81] text-[#12100E] shadow-lg"
-                        : "border border-[#D1AC81]/25 bg-[#241E18] text-[#E2E8F0] hover:border-[#C3986E] hover:text-[#D1AC81]"
-                    }`}
-                  >
-                    {tab.name}
-                  </button>
-                );
-              })}
-            </div>
+            {tabs.length > 1 ? (
+              <div
+                className="mb-8 flex flex-wrap justify-center gap-2 sm:mb-10 sm:gap-3"
+                role="tablist"
+                aria-label="فئات المنتجات"
+                dir="rtl"
+              >
+                {tabs.map((tab) => {
+                  const selected = activeCategory === tab.id;
+                  const count =
+                    tab.id === ALL
+                      ? products.length
+                      : products.filter((p) => p.category === tab.id).length;
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={selected}
+                      onClick={() => setActiveCategory(tab.id)}
+                      className={`inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-xs font-semibold transition-all duration-300 sm:text-sm ${
+                        selected
+                          ? "bg-gradient-to-r from-[#C3986E] to-[#D1AC81] text-[#12100E] shadow-lg"
+                          : "border border-[#D1AC81]/25 bg-[#241E18] text-[#E2E8F0] hover:border-[#C3986E] hover:text-[#D1AC81]"
+                      }`}
+                    >
+                      {tab.name}
+                      <span
+                        className={`rounded-full px-1.5 py-0.5 text-[10px] tabular-nums ${
+                          selected ? "bg-black/15 text-[#12100E]" : "bg-[#1A1612] text-[#D1AC81]"
+                        }`}
+                      >
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : null}
 
             {filtered.length === 0 ? (
-              <p className="py-16 text-center text-base text-brand-text-light sm:text-lg">
-                لا توجد منتجات حالياً
-              </p>
+              <EmptyState message="لا توجد منتجات في هذا التصنيف حالياً." />
             ) : (
-              <div className="space-y-16">
-                {imagesList.length > 0 && (
-                  <div className="space-y-6">
-                    <div
-                      className="flex items-center justify-between border-r-4 border-[#C3986E] pr-3"
-                      dir="rtl"
-                    >
-                      <div className="flex items-center gap-3">
-                        <h2 className="text-2xl font-bold text-[#FAFBF9] sm:text-3xl">
-                          معرض الصور
-                        </h2>
-                        <span className="rounded-full border border-[#D1AC81]/20 bg-[#241E18] px-2.5 py-1 text-xs font-semibold text-[#D1AC81]">
-                          {imagesList.length}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-2" dir="ltr">
-                        <button
-                          type="button"
-                          onClick={() => scroll(imagesScrollRef, "left")}
-                          aria-label="التالي"
-                          className="flex h-10 w-10 items-center justify-center rounded-full border border-[#D1AC81]/30 bg-[#241E18] text-[#D1AC81] transition-all duration-300 hover:border-[#C3986E] hover:bg-[#C3986E] hover:text-[#12100E]"
-                        >
-                          ‹
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => scroll(imagesScrollRef, "right")}
-                          aria-label="السابق"
-                          className="flex h-10 w-10 items-center justify-center rounded-full border border-[#D1AC81]/30 bg-[#241E18] text-[#D1AC81] transition-all duration-300 hover:border-[#C3986E] hover:bg-[#C3986E] hover:text-[#12100E]"
-                        >
-                          ›
-                        </button>
-                      </div>
+              <div className="space-y-12 sm:space-y-16">
+                {imagesList.length > 0 ? (
+                  <div className="space-y-5">
+                    <div className="flex items-center gap-3 border-r-4 border-[#C3986E] pr-3" dir="rtl">
+                      <h2 className="text-xl font-bold text-[#FAFBF9] sm:text-2xl">المنتجات</h2>
+                      <span className="rounded-full border border-[#D1AC81]/20 bg-[#241E18] px-2.5 py-1 text-xs font-semibold text-[#D1AC81]">
+                        {imagesList.length}
+                      </span>
                     </div>
-
-                    <div
-                      ref={imagesScrollRef}
-                      className="flex gap-5 overflow-x-auto scroll-smooth pb-4 no-scrollbar"
-                      dir="rtl"
-                    >
-                      {imagesList.map((item, index) => (
-                        <div
-                          key={item.id}
-                          className="w-[85vw] max-w-[340px] flex-shrink-0 sm:w-[320px] md:w-[340px]"
-                        >
-                          {renderCard(item, index, "image")}
-                        </div>
-                      ))}
+                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                      {imagesList.map((item, index) => renderCard(item, index, "image"))}
                     </div>
                   </div>
-                )}
+                ) : null}
 
-                {videosList.length > 0 && (
-                  <div className="space-y-6">
-                    <div
-                      className="flex items-center justify-between border-r-4 border-[#C3986E] pr-3"
-                      dir="rtl"
-                    >
-                      <div className="flex items-center gap-3">
-                        <h2 className="text-2xl font-bold text-[#FAFBF9] sm:text-3xl">
-                          معرض الفيديوهات
-                        </h2>
-                        <span className="rounded-full border border-[#D1AC81]/20 bg-[#241E18] px-2.5 py-1 text-xs font-semibold text-[#D1AC81]">
-                          {videosList.length}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-2" dir="ltr">
-                        <button
-                          type="button"
-                          onClick={() => scroll(videosScrollRef, "left")}
-                          aria-label="التالي"
-                          className="flex h-10 w-10 items-center justify-center rounded-full border border-[#D1AC81]/30 bg-[#241E18] text-[#D1AC81] transition-all duration-300 hover:border-[#C3986E] hover:bg-[#C3986E] hover:text-[#12100E]"
-                        >
-                          ‹
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => scroll(videosScrollRef, "right")}
-                          aria-label="السابق"
-                          className="flex h-10 w-10 items-center justify-center rounded-full border border-[#D1AC81]/30 bg-[#241E18] text-[#D1AC81] transition-all duration-300 hover:border-[#C3986E] hover:bg-[#C3986E] hover:text-[#12100E]"
-                        >
-                          ›
-                        </button>
-                      </div>
+                {videosList.length > 0 ? (
+                  <div className="space-y-5">
+                    <div className="flex items-center gap-3 border-r-4 border-[#C3986E] pr-3" dir="rtl">
+                      <h2 className="text-xl font-bold text-[#FAFBF9] sm:text-2xl">الفيديوهات</h2>
+                      <span className="rounded-full border border-[#D1AC81]/20 bg-[#241E18] px-2.5 py-1 text-xs font-semibold text-[#D1AC81]">
+                        {videosList.length}
+                      </span>
                     </div>
-
-                    <div
-                      ref={videosScrollRef}
-                      className="flex gap-5 overflow-x-auto scroll-smooth pb-4 no-scrollbar"
-                      dir="rtl"
-                    >
-                      {videosList.map((item, index) => (
-                        <div
-                          key={item.id}
-                          className="w-[85vw] max-w-[340px] flex-shrink-0 sm:w-[320px] md:w-[340px]"
-                        >
-                          {renderCard(item, index, "video")}
-                        </div>
-                      ))}
+                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                      {videosList.map((item, index) => renderCard(item, index, "video"))}
                     </div>
                   </div>
-                )}
+                ) : null}
               </div>
             )}
           </>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import { mediaCandidates } from "@/lib/assets";
 
 type PublicMediaImgProps = {
@@ -8,14 +9,10 @@ type PublicMediaImgProps = {
   alt: string;
   className?: string;
   loading?: "lazy" | "eager";
-  /** Prefer for above-the-fold / active carousel slide */
   priority?: boolean;
-  /** Kept for API compatibility with next/image call sites */
   sizes?: string;
   onAllFailed?: () => void;
-  /** Subtle pulse placeholder until the image loads */
   showSkeleton?: boolean;
-  /** Fires when the visible candidate finishes loading */
   onLoadComplete?: () => void;
 };
 
@@ -49,9 +46,8 @@ function splitClassName(className?: string) {
 }
 
 /**
- * Static-export safe media image (GitHub Pages).
- * Uses native <img> with lazy loading + skeleton — avoids next/image
- * Image Optimization API which is incompatible with `output: "export"`.
+ * Uses next/image with unoptimized (required for GitHub Pages static export)
+ * plus lazy loading and a skeleton placeholder.
  */
 export default function PublicMediaImg({
   src,
@@ -59,7 +55,7 @@ export default function PublicMediaImg({
   className,
   loading = "lazy",
   priority = false,
-  sizes = "(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 340px",
+  sizes = "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px",
   onAllFailed,
   showSkeleton = true,
   onLoadComplete,
@@ -80,7 +76,7 @@ export default function PublicMediaImg({
       <div
         className={`flex items-center justify-center bg-[#1A1612] text-xs text-neutral-500 ${parts.layout}`}
       >
-        {src || "لا توجد صورة"}
+        {src ? "تعذر تحميل الصورة" : "لا توجد صورة"}
       </div>
     );
   }
@@ -98,16 +94,17 @@ export default function PublicMediaImg({
         </span>
       ) : null}
 
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <Image
         key={current}
         src={current}
         alt={alt}
+        fill
         sizes={sizes}
-        loading={priority ? "eager" : loading}
+        unoptimized
+        priority={priority}
+        loading={priority ? undefined : loading}
         decoding="async"
-        fetchPriority={priority ? "high" : "auto"}
-        className={`absolute inset-0 h-full w-full ${parts.objectFit} ${parts.motion} transition-opacity duration-500 ease-out ${
+        className={`${parts.objectFit} ${parts.motion} transition-opacity duration-500 ease-out ${
           loaded ? "opacity-100" : "opacity-0"
         }`}
         onLoad={() => {

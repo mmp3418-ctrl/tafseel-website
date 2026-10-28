@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
 import { motion } from "framer-motion";
 import { db } from "@/lib/firebase";
+import PublicMediaImg from "@/components/PublicMediaImg";
 
 type FirestoreProject = {
   id: string;
@@ -43,12 +44,12 @@ function MediaPreview({
   }
 
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
+    <PublicMediaImg
       src={mediaUrl}
       alt={title}
       className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
       loading="lazy"
+      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 380px"
     />
   );
 }

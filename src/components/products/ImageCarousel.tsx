@@ -86,9 +86,8 @@ export default function ImageCarousel({
                 src={current}
                 alt={`${alt} — ${index + 1}`}
                 className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
-                loading={index === 0 ? "eager" : "lazy"}
-                priority={index === 0}
-                sizes="(max-width: 640px) 85vw, 340px"
+                loading="lazy"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 380px"
                 showSkeleton
                 onAllFailed={() => setFailed(true)}
               />
