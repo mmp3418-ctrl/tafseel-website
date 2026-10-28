@@ -210,7 +210,7 @@
                     multiple
                     class="field file:ml-3 file:rounded-lg file:border-0 file:bg-gold file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-ink"
                   />
-                  <p class="mt-2 text-xs text-mist/60">يمكنك اختيار عدة صور دفعة واحدة. للفيديو اكتفِ بملف واحد. احذف أي معاينة قبل الحفظ إن لزم.</p>
+                  <p class="mt-2 text-xs text-mist/60">JPG / PNG / WebP / GIF / MP4 فقط. ملفات DNG / RAW / TIFF مرفوضة تلقائيًا. الصور الكبيرة تُضغط إلى &lt; 500KB تلقائيًا.</p>
                   <div id="product-media-preview" class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3"></div>
                 </div>
                 <button
@@ -249,7 +249,7 @@
                 accept="image/*,video/*"
                 class="field file:ml-3 file:rounded-lg file:border-0 file:bg-gold file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-ink"
               />
-              <p class="text-xs text-mist/60">تُرفع الصورة أو الفيديو إلى التخزين، ويُحفظ الرابط العام في قاعدة البيانات.</p>
+              <p class="text-xs text-mist/60">تُرفع الصورة أو الفيديو إلى التخزين، ويُحفظ الرابط العام في قاعدة البيانات. صور DNG / RAW / TIFF مرفوضة.</p>
               <button
                 id="project-submit"
                 type="submit"
@@ -296,7 +296,7 @@
                 <input id="home-products-title" class="field" placeholder="عنوان القسم" />
                 <textarea id="home-products-subtitle" rows="2" class="field" placeholder="وصف القسم"></textarea>
                 <input id="home-order-label" class="field" placeholder="نص زر الطلب" />
-                <p class="text-xs text-mist/60">أضف بطاقات فارغة جاهزة ثم املأها لاحقًا — تظهر في الموقع فور الحفظ.</p>
+                <p class="text-xs text-mist/60">أضف بطاقات فارغة جاهزة ثم املأها لاحقًا — تظهر في الموقع فور الحفظ. الصور تُضغط تلقائيًا.</p>
                 <div id="home-featured-list" class="grid gap-4 lg:grid-cols-2"></div>
               </div>
             </section>
@@ -509,6 +509,35 @@
       ::-webkit-scrollbar-thumb:hover {
         background: rgba(195, 152, 110, 0.6);
       }
+
+      /* ===== NEW: Spinner for busy buttons ===== */
+      @keyframes tafasil-spin {
+        to { transform: rotate(360deg); }
+      }
+      .tafasil-spinner {
+        display: inline-block;
+        width: 1em;
+        height: 1em;
+        margin-inline-end: 0.5em;
+        vertical-align: -0.15em;
+        border: 2px solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        animation: tafasil-spin 0.7s linear infinite;
+      }
+      .processing-tile {
+        position: relative;
+      }
+      .processing-tile::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 0.5rem;
+        background: rgba(18, 16, 14, 0.55);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
     </style>
 
     <script type="module">
@@ -561,6 +590,200 @@
       let stopWatchers = () => {};
       let noticeTimer = 0;
       let lastNotice = "";
+
+      /* ============================================================
+         NEW: Image validation + compression utilities
+         ============================================================ */
+
+      // Extensions that are NOT safe to upload (RAW / DNG / TIFF family).
+      const UNSUPPORTED_EXTENSIONS = new Set([
+        "dng", "raw", "tiff", "tif",
+        "cr2", "cr3", "nef", "arw", "orf", "rw2", "raf", "srw",
+        "heic", "heif",
+      ]);
+
+      // MIME types we accept for still images.
+      const ALLOWED_IMAGE_MIMES = new Set([
+        "image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif", "image/bmp",
+      ]);
+
+      const MAX_IMAGE_DIMENSION = 1200;
+      const MAX_IMAGE_BYTES = 500 * 1024; // 500 KB hard cap
+      const COMPRESSION_QUALITY = 0.82;
+
+      function fileExtension(name) {
+        const match = /\.([a-z0-9]+)$/i.exec(String(name || ""));
+        return match ? match[1].toLowerCase() : "";
+      }
+
+      function isVideoFile(file) {
+        if (!file) return false;
+        if (file.type && file.type.startsWith("video/")) return true;
+        return /\.(mp4|webm|ogg|mov|m4v|avi|mkv)$/i.test(file.name || "");
+      }
+
+      /**
+       * Validate a single file for image upload.
+       * Returns { ok: true } or { ok: false, reason: string }.
+       */
+      function validateImageFile(file) {
+        if (!file) return { ok: false, reason: "لم يتم اختيار ملف." };
+
+        // 1) Hard reject RAW / DNG / TIFF by extension.
+        const ext = fileExtension(file.name);
+        if (UNSUPPORTED_EXTENSIONS.has(ext)) {
+          return {
+            ok: false,
+            reason: `الملف "${file.name}" بصيغة ${ext.toUpperCase()} غير مدعوم. الرجاء استخدام JPG أو PNG أو WebP.`,
+          };
+        }
+
+        // 2) Reject anything whose MIME is clearly not an image.
+        if (file.type && !file.type.startsWith("image/") && !isVideoFile(file)) {
+          return {
+            ok: false,
+            reason: `الملف "${file.name}" ليس صورة مدعومة.`,
+          };
+        }
+
+        // 3) If it declares an image MIME but it's not in our allow-list, reject.
+        if (file.type && file.type.startsWith("image/") && !ALLOWED_IMAGE_MIMES.has(file.type.toLowerCase())) {
+          return {
+            ok: false,
+            reason: `صيغة ${file.type} غير مدعومة. استخدم JPG أو PNG أو WebP.`,
+          };
+        }
+
+        // 4) Very small files may be corrupt; still allowed but warn.
+        if (file.size > 60 * 1024 * 1024) {
+          return {
+            ok: false,
+            reason: `الملف "${file.name}" كبير جدًا (${formatBytes(file.size)}). الحد الأقصى 60 ميغابايت قبل الضغط.`,
+          };
+        }
+
+        return { ok: true };
+      }
+
+      function formatBytes(bytes) {
+        if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
+        const units = ["B", "KB", "MB", "GB"];
+        const i = Math.min(units.length - 1, Math.floor(Math.log(bytes) / Math.log(1024)));
+        const value = bytes / Math.pow(1024, i);
+        return `${value.toFixed(value >= 10 || i === 0 ? 0 : 1)} ${units[i]}`;
+      }
+
+      async function decodeImage(file) {
+        // Prefer createImageBitmap — faster and avoids DOM.
+        if (typeof createImageBitmap === "function") {
+          try {
+            return await createImageBitmap(file);
+          } catch {
+            /* fall through to <img> path */
+          }
+        }
+        return new Promise((resolve, reject) => {
+          const url = URL.createObjectURL(file);
+          const img = new Image();
+          img.onload = () => {
+            URL.revokeObjectURL(url);
+            resolve(img);
+          };
+          img.onerror = () => {
+            URL.revokeObjectURL(url);
+            reject(new Error("تعذر قراءة محتوى الصورة."));
+          };
+          img.src = url;
+        });
+      }
+
+      function canvasToBlob(canvas, mimeType, quality) {
+        return new Promise((resolve) => {
+          if (canvas.toBlob) {
+            canvas.toBlob((blob) => resolve(blob), mimeType, quality);
+          } else {
+            // Very old browsers: dataURL fallback.
+            try {
+              const dataUrl = canvas.toDataURL(mimeType, quality);
+              const bin = atob(dataUrl.split(",")[1] || "");
+              const bytes = new Uint8Array(bin.length);
+              for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+              resolve(new Blob([bytes], { type: mimeType }));
+            } catch {
+              resolve(null);
+            }
+          }
+        });
+      }
+
+      /**
+       * Compress + resize an image file entirely on the client.
+       * Returns a new File (image/jpeg) guaranteed to be <= MAX_IMAGE_BYTES
+       * whenever possible, preserving aspect ratio.
+       */
+      async function compressImage(file, options = {}) {
+        const {
+          maxDimension = MAX_IMAGE_DIMENSION,
+          quality = COMPRESSION_QUALITY,
+          maxBytes = MAX_IMAGE_BYTES,
+          mimeType = "image/jpeg",
+        } = options;
+
+        if (isVideoFile(file)) return file; // videos pass through untouched
+
+        const decoded = await decodeImage(file);
+        const origW = decoded.width || decoded.naturalWidth;
+        const origH = decoded.height || decoded.naturalHeight;
+        if (!origW || !origH) throw new Error("أبعاد الصورة غير صالحة.");
+
+        // Compute scaled dimensions preserving aspect ratio.
+        const scale = Math.min(1, maxDimension / Math.max(origW, origH));
+        let targetW = Math.max(1, Math.round(origW * scale));
+        let targetH = Math.max(1, Math.round(origH * scale));
+
+        // Try a few quality/dimension passes until we fit under maxBytes.
+        const attempts = [
+          { w: targetW, h: targetH, q: quality },
+          { w: targetW, h: targetH, q: 0.7 },
+          { w: Math.round(targetW * 0.85), h: Math.round(targetH * 0.85), q: 0.7 },
+          { w: Math.round(targetW * 0.7), h: Math.round(targetH * 0.7), q: 0.65 },
+          { w: Math.min(900, targetW), h: Math.min(900, targetH), q: 0.6 },
+        ];
+
+        let lastBlob = null;
+        for (const attempt of attempts) {
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.max(1, attempt.w);
+          canvas.height = Math.max(1, attempt.h);
+          const ctx = canvas.getContext("2d", { alpha: true });
+          if (!ctx) throw new Error("لا يدعم هذا المتصفح معالجة الصور.");
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = "high";
+          ctx.drawImage(decoded, 0, 0, canvas.width, canvas.height);
+
+          const blob = await canvasToBlob(canvas, mimeType, attempt.q);
+          if (!blob) continue;
+          lastBlob = blob;
+          if (blob.size <= maxBytes) break;
+          // reduce target for next attempt
+          targetW = attempt.w;
+          targetH = attempt.h;
+        }
+
+        if (typeof decoded.close === "function") decoded.close();
+
+        if (!lastBlob) throw new Error("فشل ضغط الصورة على المتصفح.");
+
+        const baseName = (file.name || "image").replace(/\.[^.]+$/, "");
+        return new File([lastBlob], `${baseName}.jpg`, {
+          type: mimeType,
+          lastModified: Date.now(),
+        });
+      }
+
+      /* ============================================================
+         End image utilities
+         ============================================================ */
 
       function escapeHtml(value) {
         return String(value ?? "")
@@ -684,10 +907,19 @@
             const preview = isVideo
               ? `<video src="${escapeHtml(item.previewUrl)}" class="h-24 w-full rounded-lg bg-black object-cover" muted playsinline></video>`
               : `<img src="${escapeHtml(item.previewUrl)}" alt="" class="h-24 w-full rounded-lg object-cover" />`;
+
+            // Show size/state label.
+            let meta = escapeHtml(item.name || "");
+            if (item.compressedSize) {
+              meta += ` · ${formatBytes(item.compressedSize)}`;
+            } else if (item.processing) {
+              meta += ' · <span class="text-sand">جاري المعالجة…</span>';
+            }
+
             return `
-              <div class="dyn-card relative space-y-1.5 p-2">
+              <div class="dyn-card relative space-y-1.5 p-2 ${item.processing ? "processing-tile" : ""}">
                 ${preview}
-                <p class="truncate text-[10px] text-mist/60">${escapeHtml(item.name || "")}</p>
+                <p class="truncate text-[10px] text-mist/60">${meta}</p>
                 <button type="button" data-draft-remove="${index}" class="btn-danger w-full">إزالة</button>
               </div>`;
           })
@@ -858,9 +1090,15 @@
         return "image";
       }
 
-      async function uploadToSupabase(file) {
-        const filePath = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
-        const { error } = await supabaseClient.storage.from(BUCKET_NAME).upload(filePath, file);
+      async function uploadToSupabase(file, onProgress) {
+        const safeName = String(file.name || "file").replace(/[^a-zA-Z0-9._-]/g, "_");
+        const filePath = `${Date.now()}_${safeName}`;
+        if (typeof onProgress === "function") onProgress(`رفع ${safeName}…`);
+        const { error } = await supabaseClient.storage.from(BUCKET_NAME).upload(filePath, file, {
+          cacheControl: "31536000",
+          upsert: false,
+          contentType: file.type || undefined,
+        });
         if (error) throw error;
         const { data: publicUrlData } = supabaseClient.storage.from(BUCKET_NAME).getPublicUrl(filePath);
         if (!publicUrlData?.publicUrl) throw new Error("تعذر الحصول على الرابط العام للملف.");
@@ -872,14 +1110,30 @@
           if (!existingUrl) throw new Error("اختر صورة أو فيديو.");
           return { mediaUrl: existingUrl, mediaType: existingType || "image", notice: "" };
         }
-        const mediaUrl = await uploadToSupabase(file);
-        return { mediaUrl, mediaType: mediaTypeOf(file) };
+        // If it's an image, validate + compress; videos pass through.
+        let uploadFile = file;
+        if (!isVideoFile(file)) {
+          const check = validateImageFile(file);
+          if (!check.ok) throw new Error(check.reason);
+          uploadFile = await compressImage(file);
+        }
+        const mediaUrl = await uploadToSupabase(uploadFile);
+        return { mediaUrl, mediaType: mediaTypeOf(uploadFile) };
       }
 
+      // NEW: setBusy now shows a spinner + preserves the original label.
       function setBusy(button, busy, idleLabel, busyLabel = "جاري الحفظ…") {
-        button.disabled = busy;
-        button.textContent = busy ? busyLabel : idleLabel;
-        button.classList.toggle("opacity-60", busy);
+        if (!button) return;
+        if (busy) {
+          if (!button.dataset.idleLabel) button.dataset.idleLabel = idleLabel || button.textContent.trim();
+          button.disabled = true;
+          button.innerHTML = `<span class="tafasil-spinner" aria-hidden="true"></span>${escapeHtml(busyLabel)}`;
+          button.classList.add("opacity-80", "cursor-not-allowed");
+        } else {
+          button.disabled = false;
+          button.textContent = idleLabel || button.dataset.idleLabel || "حفظ";
+          button.classList.remove("opacity-80", "cursor-not-allowed");
+        }
       }
 
       const HOME_DEFAULTS = {
@@ -975,10 +1229,6 @@
 
       function setVal(id, value) {
         document.getElementById(id).value = value || "";
-      }
-
-      function previewBox(target, item) {
-        target.innerHTML = item?.mediaUrl ? mediaMarkup(item) : "";
       }
 
       function renderFeaturedList() {
@@ -1352,20 +1602,73 @@
         }
       });
 
-      document.getElementById("product-media").addEventListener("change", (event) => {
+      /* ============================================================
+         Product media input: validate + compress each selected file
+         ============================================================ */
+      document.getElementById("product-media").addEventListener("change", async (event) => {
         const files = [...(event.target.files || [])];
         if (!files.length) return;
-        files.forEach((file) => {
-          const mediaType = mediaTypeOf(file);
-          productDraftMedia.push({
+
+        const accepted = [];
+        const rejected = [];
+
+        for (const file of files) {
+          if (isVideoFile(file)) {
+            accepted.push({
+              file,
+              name: file.name,
+              mediaType: "video",
+              previewUrl: URL.createObjectURL(file),
+              compressedSize: file.size,
+            });
+            continue;
+          }
+          const check = validateImageFile(file);
+          if (!check.ok) {
+            rejected.push(check.reason);
+            continue;
+          }
+          accepted.push({
             file,
             name: file.name,
-            mediaType,
-            previewUrl: URL.createObjectURL(file),
+            mediaType: "image",
+            previewUrl: URL.createObjectURL(file), // preview original for speed
+            compressedSize: 0,
+            processing: true,
           });
-        });
+        }
+
+        if (rejected.length) {
+          notify(rejected[0] + (rejected.length > 1 ? ` (و${rejected.length - 1} ملفات أخرى مرفوضة)` : ""), "error");
+        }
+
+        // Push accepted items into draft immediately so the admin sees previews.
+        productDraftMedia.push(...accepted);
         event.target.value = "";
         renderProductDraftMedia();
+
+        // Now compress each accepted image and update the draft.
+        for (const entry of accepted) {
+          if (entry.mediaType !== "image") continue;
+          try {
+            const compressed = await compressImage(entry.file);
+            const wasBigger = entry.file.size > compressed.size;
+            entry.file = compressed;
+            entry.compressedSize = compressed.size;
+            entry.processing = false;
+            // Refresh the blob preview to the compressed version for accuracy.
+            if (entry.previewUrl?.startsWith("blob:")) URL.revokeObjectURL(entry.previewUrl);
+            entry.previewUrl = URL.createObjectURL(compressed);
+            renderProductDraftMedia();
+            if (wasBigger) {
+              notify(`تم ضغط ${entry.name} (${formatBytes(entry.file.size)} ← ${formatBytes(compressed.size)})`, "ok");
+            }
+          } catch (error) {
+            entry.processing = false;
+            renderProductDraftMedia();
+            notify(`تعذر ضغط "${entry.name}": ${errorMessage(error)}`, "error");
+          }
+        }
       });
 
       document.getElementById("product-media-preview").addEventListener("click", (event) => {
@@ -1392,11 +1695,18 @@
           notify("أضف صورة واحدة على الأقل أو فيديو للمنتج.", "error");
           return;
         }
+        if (productDraftMedia.some((item) => item.processing)) {
+          notify("انتظر انتهاء معالجة الصور قبل الحفظ.", "error");
+          return;
+        }
 
         setBusy(button, true, "حفظ المنتج", "جاري رفع الوسائط…");
         try {
           const uploaded = [];
+          let i = 0;
           for (const item of productDraftMedia) {
+            i += 1;
+            button.innerHTML = `<span class="tafasil-spinner" aria-hidden="true"></span>رفع الملف ${i}/${productDraftMedia.length}…`;
             const mediaUrl = await uploadToSupabase(item.file);
             uploaded.push({
               mediaUrl,
@@ -1449,6 +1759,9 @@
         }
       });
 
+      /* ============================================================
+         Project media: validate + compress single file
+         ============================================================ */
       document.getElementById("project-form").addEventListener("submit", async (event) => {
         event.preventDefault();
         const button = document.getElementById("project-submit");
@@ -1464,9 +1777,19 @@
           return;
         }
 
-        setBusy(button, true, "حفظ المشروع");
+        // Reject DNG/RAW/TIFF immediately.
+        if (!isVideoFile(file)) {
+          const check = validateImageFile(file);
+          if (!check.ok) {
+            notify(check.reason, "error");
+            return;
+          }
+        }
+
+        setBusy(button, true, "حفظ المشروع", "جاري معالجة الوسائط…");
         try {
           const media = await mediaFromFile(file);
+          button.innerHTML = `<span class="tafasil-spinner" aria-hidden="true"></span>جاري الحفظ…`;
           await addDoc(collection(db, "projects"), {
             title,
             description,
@@ -1475,7 +1798,7 @@
             createdAt: serverTimestamp(),
           });
           event.target.reset();
-          notify(media.notice || "تم حفظ المشروع.", "ok");
+          notify("تم حفظ المشروع.", "ok");
         } catch (error) {
           notify(errorMessage(error), "error");
         } finally {
@@ -1580,6 +1903,7 @@
           syncFeaturedFromDom();
           syncListsFromDom();
 
+          // Hero video is video-only — no image validation needed.
           const heroFile = document.getElementById("home-hero-video").files[0];
           if (heroFile) {
             homeMedia.heroVideoUrl = await uploadToSupabase(heroFile);
@@ -1590,8 +1914,17 @@
             const file = input.files[0];
             const index = Number(input.dataset.featuredFile);
             if (!file || !homeMedia.featured[index]) continue;
-            homeMedia.featured[index].mediaUrl = await uploadToSupabase(file);
-            homeMedia.featured[index].mediaType = mediaTypeOf(file);
+            let uploadFile = file;
+            if (!isVideoFile(file)) {
+              const check = validateImageFile(file);
+              if (!check.ok) {
+                notify(check.reason, "error");
+                continue;
+              }
+              uploadFile = await compressImage(file);
+            }
+            homeMedia.featured[index].mediaUrl = await uploadToSupabase(uploadFile);
+            homeMedia.featured[index].mediaType = mediaTypeOf(uploadFile);
           }
 
           const fileInputs = [...document.querySelectorAll("[data-gallery-file]")];
@@ -1599,8 +1932,17 @@
             const file = input.files[0];
             const index = Number(input.dataset.galleryFile);
             if (!file || !homeMedia.gallery[index]) continue;
-            homeMedia.gallery[index].mediaUrl = await uploadToSupabase(file);
-            homeMedia.gallery[index].mediaType = mediaTypeOf(file);
+            let uploadFile = file;
+            if (!isVideoFile(file)) {
+              const check = validateImageFile(file);
+              if (!check.ok) {
+                notify(check.reason, "error");
+                continue;
+              }
+              uploadFile = await compressImage(file);
+            }
+            homeMedia.gallery[index].mediaUrl = await uploadToSupabase(uploadFile);
+            homeMedia.gallery[index].mediaType = mediaTypeOf(uploadFile);
           }
           const gallery = homeMedia.gallery
             .map((item, index) => {
