@@ -32,6 +32,22 @@ const ALL = "__all__";
 const PRODUCTS_CACHE = "catalog_products_v2";
 const CATEGORIES_CACHE = "catalog_categories_v2";
 
+/**
+ * دالة لتنقية روابط الصور واستبعاد الصيغ الخام غير المدعومة مثل .dng أو .raw
+ */
+function sanitizeImages(images: string[]): string[] {
+  if (!Array.isArray(images)) return [];
+  return images.filter((img) => {
+    if (!img || typeof img !== "string") return false;
+    const lower = img.toLowerCase().split("?")[0];
+    // استبعاد ملفات DNG والـ RAW التي لا تدعمها المتصفحات وتسبب بطء الشاشة
+    if (lower.endsWith(".dng") || lower.endsWith(".raw") || lower.endsWith(".tiff")) {
+      return false;
+    }
+    return true;
+  });
+}
+
 function isVideoProduct(item: FirestoreProduct): boolean {
   return item.mediaType === "video" && Boolean(item.mediaUrl) && item.images.length === 0;
 }
@@ -140,14 +156,19 @@ export default function ProductsCatalog() {
         const items: FirestoreProduct[] = prodDocs.map((docSnap) => {
           const data = docSnap.data() as Record<string, unknown>;
           const media = normalizeProductMedia(data);
+          
+          // تنقية الصور وتصفية ملفات الـ DNG التالفة أو الثقيلة
+          const cleanImages = sanitizeImages(media.images);
+          const cleanMediaUrl = sanitizeImages([media.mediaUrl])[0] || "";
+
           return {
             id: docSnap.id,
             title: String(data.title ?? ""),
             category: String(data.category ?? ""),
             description: String(data.description ?? ""),
-            mediaUrl: media.mediaUrl,
+            mediaUrl: cleanMediaUrl,
             mediaType: media.mediaType,
-            images: media.images,
+            images: cleanImages,
           };
         });
 
@@ -191,46 +212,54 @@ export default function ProductsCatalog() {
     [categories]
   );
 
-  const renderCard = (item: FirestoreProduct, index: number, mode: "image" | "video") => (
-    <motion.article
-      key={item.id}
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: Math.min(index * 0.03, 0.24), duration: 0.35 }}
-      className="flex h-full flex-col overflow-hidden rounded-2xl border border-[rgba(209,172,129,0.2)] bg-[#241E18] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#C3986E] hover:shadow-xl"
-      style={{ contentVisibility: "auto", containIntrinsicSize: "420px" }}
-    >
-      <div className="relative overflow-hidden bg-[#1A1612]">
-        {mode === "video" ? (
-          <div className="aspect-[16/11]">
-            <VideoPreview mediaUrl={item.mediaUrl} title={item.title} />
-          </div>
-        ) : (
-          <ImageCarousel
-            images={item.images.length ? item.images : item.mediaUrl ? [item.mediaUrl] : []}
-            alt={item.title || "منتج"}
-            compact
-          />
-        )}
-        {mode === "image" && item.images.length > 1 ? (
-          <span className="pointer-events-none absolute top-2 left-2 z-20 rounded-full border border-[#D1AC81]/35 bg-black/55 px-2 py-0.5 text-[10px] font-semibold text-[#D1AC81] backdrop-blur-md">
-            {item.images.length} صور
-          </span>
-        ) : null}
-      </div>
-      <div className="flex flex-1 flex-col space-y-2 p-4 sm:p-5" dir="rtl">
-        {item.category ? (
-          <span className="inline-flex w-fit rounded-full border border-[#D1AC81]/30 px-2.5 py-0.5 text-xs font-semibold text-[#D1AC81]">
-            {item.category}
-          </span>
-        ) : null}
-        <h2 className="text-lg font-bold leading-snug text-[#FAFBF9] sm:text-xl">{item.title}</h2>
-        {item.description ? (
-          <p className="line-clamp-3 text-sm leading-relaxed text-[#E2E8F0]/85">{item.description}</p>
-        ) : null}
-      </div>
-    </motion.article>
-  );
+  const renderCard = (item: FirestoreProduct, index: number, mode: "image" | "video") => {
+    const productImages = item.images.length
+      ? item.images
+      : item.mediaUrl
+      ? [item.mediaUrl]
+      : [];
+
+    return (
+      <motion.article
+        key={item.id}
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: Math.min(index * 0.03, 0.24), duration: 0.35 }}
+        className="flex h-full flex-col overflow-hidden rounded-2xl border border-[rgba(209,172,129,0.2)] bg-[#241E18] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#C3986E] hover:shadow-xl"
+        style={{ contentVisibility: "auto", containIntrinsicSize: "420px" }}
+      >
+        <div className="relative overflow-hidden bg-[#1A1612]">
+          {mode === "video" ? (
+            <div className="aspect-[16/11]">
+              <VideoPreview mediaUrl={item.mediaUrl} title={item.title} />
+            </div>
+          ) : (
+            <ImageCarousel
+              images={productImages}
+              alt={item.title || "منتج"}
+              compact
+            />
+          )}
+          {mode === "image" && productImages.length > 1 ? (
+            <span className="pointer-events-none absolute top-2 left-2 z-20 rounded-full border border-[#D1AC81]/35 bg-black/55 px-2 py-0.5 text-[10px] font-semibold text-[#D1AC81] backdrop-blur-md">
+              {productImages.length} صور
+            </span>
+          ) : null}
+        </div>
+        <div className="flex flex-1 flex-col space-y-2 p-4 sm:p-5" dir="rtl">
+          {item.category ? (
+            <span className="inline-flex w-fit rounded-full border border-[#D1AC81]/30 px-2.5 py-0.5 text-xs font-semibold text-[#D1AC81]">
+              {item.category}
+            </span>
+          ) : null}
+          <h2 className="text-lg font-bold leading-snug text-[#FAFBF9] sm:text-xl">{item.title}</h2>
+          {item.description ? (
+            <p className="line-clamp-3 text-sm leading-relaxed text-[#E2E8F0]/85">{item.description}</p>
+          ) : null}
+        </div>
+      </motion.article>
+    );
+  };
 
   return (
     <section className="relative bg-brand-bg px-4 py-12 sm:px-8 sm:py-16 lg:px-10 lg:py-20">
